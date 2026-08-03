@@ -24,8 +24,8 @@ function Dashboard() {
       }
       return response.json()
     },
-    refetchInterval: 900000,
-    staleTime: 900000,
+    refetchInterval: 9000,
+    staleTime: 9000,
   })
 
   return (
