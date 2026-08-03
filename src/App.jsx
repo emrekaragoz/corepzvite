@@ -1,6 +1,34 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
+import Footer from './components/Footer'
+import CoinSelector from './components/CoinSelector'
+
+// ✅ Tasarım için MOCK VERİ (Kârlı İşlem Senaryosu)
+const MOCK_TRADE_DATA = {
+  order_ref: "BTC-USDT-9X42A-LONG",
+  profit: 1245.80,
+  buy_price: 64250.00,
+  sell_price: 65495.80,
+  buy_time: "2026-08-04 09:15:22",
+  sell_time: "2026-08-04 11:42:05",
+  duration: "2h 26m 43s",
+  last_signal_type: "RSI Cross / MACD",
+  last_signal_volume: 1245000
+}
+
+// ❌ Alternatif MOCK VERİ (Zarar Eden İşlem - Test için return satırında değiştir)
+const MOCK_TRADE_DATA_LOSS = {
+  order_ref: "ETH-USDT-7B21C-SHORT",
+  profit: -320.50,
+  buy_price: 3450.20,
+  sell_price: 3210.00,
+  buy_time: "2026-08-04 13:00:00",
+  sell_time: "2026-08-04 13:15:45",
+  duration: "15m 45s",
+  last_signal_type: "Breakout Failed",
+  last_signal_volume: 850000
+}
 
 const TRADE_URL = 'http://localhost:8000/api/trade'
 
@@ -9,7 +37,12 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Dashboard />
+      <main className="flex min-h-screen flex-col bg-[#0a0a0f] text-slate-100">
+        <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+          <Dashboard />
+        </div>
+        <Footer />
+      </main>
     </QueryClientProvider>
   )
 }
@@ -18,70 +51,73 @@ function Dashboard() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['trade'],
     queryFn: async () => {
+      // ⬇️ GERÇEK API KODU (Tasarım bitince bunu aktif et)
+      /*
       const response = await fetch(TRADE_URL)
       if (!response.ok) {
         throw new Error('Unable to load trade data')
       }
       return response.json()
+      */
+
+      // ✅ MOCK DATA KODU (Şimdilik bunu kullan)
+      await new Promise(resolve => setTimeout(resolve, 800))
+      return MOCK_TRADE_DATA
     },
-    refetchInterval: 9000,
-    staleTime: 9000,
+    refetchInterval: 900000,
+    staleTime: 900000,
   })
 
   return (
-    <main className="min-h-screen bg-[#0a0a0f] text-slate-100">
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
-        <div className="w-full max-w-3xl rounded-3xl border border-cyan-400/20 bg-slate-950/80 p-4 shadow-[0_0_40px_rgba(34,211,238,0.15)] backdrop-blur-xl sm:p-8">
-          <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-sm uppercase tracking-[0.35em] text-cyan-300/80">
-                Live Market Pulse
-              </p>
-              <h1 className="text-2xl font-semibold text-white sm:text-3xl">
-                Trade Dashboard
-              </h1>
-            </div>
-            <div className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-sm text-cyan-200">
-              Auto-refresh every 15 min
-            </div>
-          </div>
-
-          {isLoading ? (
-            <div className="flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-cyan-400/20 bg-slate-900/70">
-              <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-cyan-400/20 border-t-cyan-300 shadow-[0_0_30px_rgba(34,211,238,0.35)]" />
-              <p className="text-lg font-medium text-cyan-100">Syncing trade feed...</p>
-              <p className="mt-1 text-sm text-slate-400">
-                Initializing the latest market snapshot
-              </p>
-            </div>
-          ) : error ? (
-            <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-6 text-red-200 shadow-[0_0_30px_rgba(248,113,113,0.22)]">
-              <div className="mb-2 flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.8)]" />
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-red-300">
-                  Connection issue
-                </p>
-              </div>
-              <p className="text-base">
-                {error.message || 'Unable to load trade data right now.'}
-              </p>
-            </div>
-          ) : (
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={JSON.stringify(data)}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.35, ease: 'easeOut' }}
-              >
-                <TradeCard data={data} />
-              </motion.div>
-            </AnimatePresence>
-          )}
+    <div className="w-full max-w-3xl rounded-3xl border border-cyan-400/20 bg-slate-950/80 p-4 shadow-[0_0_40px_rgba(34,211,238,0.15)] backdrop-blur-xl sm:p-8">
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm uppercase tracking-[0.35em] text-cyan-300/80">
+            Live Market Pulse
+          </p>
+          <h1 className="text-2xl font-semibold text-white sm:text-3xl">
+            Trade Dashboard
+          </h1>
+        </div>
+        <div className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-sm text-cyan-200">
+          Auto-refresh every 15 min
         </div>
       </div>
-    </main>
+      <CoinSelector />
+      {isLoading ? (
+        <div className="flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-cyan-400/20 bg-slate-900/70">
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-cyan-400/20 border-t-cyan-300 shadow-[0_0_30px_rgba(34,211,238,0.35)]" />
+          <p className="text-lg font-medium text-cyan-100">Syncing trade feed...</p>
+          <p className="mt-1 text-sm text-slate-400">
+            Initializing the latest market snapshot
+          </p>
+        </div>
+      ) : error ? (
+        <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-6 text-red-200 shadow-[0_0_30px_rgba(248,113,113,0.22)]">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="h-2.5 w-2.5 rounded-full bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.8)]" />
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-red-300">
+              Connection issue
+            </p>
+          </div>
+          <p className="text-base">
+            {error.message || 'Unable to load trade data right now.'}
+          </p>
+        </div>
+      ) : (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={JSON.stringify(data)}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+          >
+            <TradeCard data={data} />
+          </motion.div>
+        </AnimatePresence>
+      )}
+    </div>
   )
 }
 
@@ -103,11 +139,9 @@ function TradeCard({ data }) {
     if (value === null || value === undefined || value === '') {
       return '—'
     }
-
     if (typeof value === 'number') {
       return value.toLocaleString()
     }
-
     return value
   }
 
