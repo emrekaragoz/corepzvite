@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 const COINS = [
   { id: 'BTC', label: 'BTC', locked: false },
@@ -7,7 +7,6 @@ const COINS = [
   { id: 'TRX', label: 'TRX', locked: true },
 ]
 
-// Kilit İkonu (SVG)
 function LockIcon({ className }) {
   return (
     <svg
@@ -26,19 +25,15 @@ function LockIcon({ className }) {
   )
 }
 
-function CoinSelector() {
-  const [activeCoin, setActiveCoin] = useState('BTC')
-
+function CoinSelector({ activeCoin, onSelectCoin }) {
   const handleSelect = (coin) => {
     if (!coin.locked) {
-      setActiveCoin(coin.id)
-      // İleride burada API'ye coin değişikliği isteği atabilirsin
+      onSelectCoin(coin.id)
     }
   }
 
   return (
     <div className="mb-8 flex justify-center">
-      {/* Oval Tab Bar Container */}
       <div className="inline-flex items-center gap-1 rounded-full border border-cyan-500/20 bg-slate-900/60 p-1 backdrop-blur-md shadow-[0_0_20px_rgba(34,211,238,0.08)]">
         {COINS.map((coin) => {
           const isActive = activeCoin === coin.id
@@ -60,7 +55,6 @@ function CoinSelector() {
                   : 'cursor-pointer hover:bg-cyan-500/10 hover:text-cyan-300'
               }`}
             >
-              {/* Sadece kilitli ise ikonu göster */}
               {isLocked && <LockIcon className="h-3 w-3 opacity-60" />}
               <span>{coin.label}</span>
             </button>

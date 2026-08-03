@@ -22,7 +22,7 @@ function Footer() {
             rel="noopener noreferrer"
             className="text-cyan-400/80 transition-all duration-300 hover:text-cyan-300 hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]"
           >
-            emrekaragoz.dev
+            DEV.KARAGOZ@GMAIL.COM
           </a>
 
         </div>

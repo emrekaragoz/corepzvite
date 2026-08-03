@@ -3,32 +3,48 @@ import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-quer
 import { AnimatePresence, motion } from 'framer-motion'
 import Footer from './components/Footer'
 import CoinSelector from './components/CoinSelector'
+import PriceChart from './components/PriceChart'
+import SummaryCard from './components/SummaryCard'
 
-// ✅ Tasarım için MOCK VERİ (Kârlı İşlem Senaryosu)
-const MOCK_TRADE_DATA = {
-  order_ref: "BTC-USDT-9X42A-LONG",
-  profit: 1245.80,
-  buy_price: 64250.00,
-  sell_price: 65495.80,
-  buy_time: "2026-08-04 09:15:22",
-  sell_time: "2026-08-04 11:42:05",
-  duration: "2h 26m 43s",
-  last_signal_type: "RSI Cross / MACD",
-  last_signal_volume: 1245000
-}
-
-// ❌ Alternatif MOCK VERİ (Zarar Eden İşlem - Test için return satırında değiştir)
-const MOCK_TRADE_DATA_LOSS = {
-  order_ref: "ETH-USDT-7B21C-SHORT",
-  profit: -320.50,
-  buy_price: 3450.20,
-  sell_price: 3210.00,
-  buy_time: "2026-08-04 13:00:00",
-  sell_time: "2026-08-04 13:15:45",
-  duration: "15m 45s",
-  last_signal_type: "Breakout Failed",
-  last_signal_volume: 850000
-}
+// ✅ ÇOKLU MOCK VERİ (Compound hesaplama için)
+const MOCK_TRADES = [
+  {
+    id: 1,
+    order_ref: "BTC-USDT-7G8H9I",
+    profit: 800,         // %8 kar
+    buy_price: 10000,
+    sell_price: 10800,
+    buy_time: "2026-08-04 14:20:10",
+    sell_time: "2026-08-04 14:45:30",
+    duration: "25m 20s",
+    last_signal_type: "EMA Cross",
+    last_signal_volume: 450000
+  },
+  {
+    id: 2,
+    order_ref: "BTC-USDT-4D5E6F",
+    profit: -500,        // %5 zarar
+    buy_price: 10000,
+    sell_price: 9500,
+    buy_time: "2026-08-01 13:00:00",
+    sell_time: "2026-08-01 13:15:45",
+    duration: "15m 45s",
+    last_signal_type: "Breakout Failed",
+    last_signal_volume: 850000
+  },
+  {
+    id: 3,
+    order_ref: "BTC-USDT-1A2B3C",
+    profit: 1000,        // %10 kar
+    buy_price: 10000,
+    sell_price: 11000,
+    buy_time: "2026-07-04 09:15:22",
+    sell_time: "2026-07-04 11:42:05",
+    duration: "2h 26m",
+    last_signal_type: "RSI Cross",
+    last_signal_volume: 1200000
+  }
+]
 
 const TRADE_URL = 'http://localhost:8000/api/trade'
 
@@ -48,28 +64,31 @@ function App() {
 }
 
 function Dashboard() {
+  // Coin state'i burada tutuluyor (tüm bileşenler senkronize)
+  const [activeCoin, setActiveCoin] = useState('BTC')
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ['trade'],
+    queryKey: ['trade', activeCoin],
     queryFn: async () => {
       // ⬇️ GERÇEK API KODU (Tasarım bitince bunu aktif et)
       /*
       const response = await fetch(TRADE_URL)
-      if (!response.ok) {
-        throw new Error('Unable to load trade data')
-      }
+      if (!response.ok) throw new Error('Unable to load trade data')
       return response.json()
       */
 
-      // ✅ MOCK DATA KODU (Şimdilik bunu kullan)
+      // ✅ MOCK DATA
       await new Promise(resolve => setTimeout(resolve, 800))
-      return MOCK_TRADE_DATA
+      return MOCK_TRADES
     },
     refetchInterval: 900000,
     staleTime: 900000,
   })
 
   return (
-    <div className="w-full max-w-3xl rounded-3xl border border-cyan-400/20 bg-slate-950/80 p-4 shadow-[0_0_40px_rgba(34,211,238,0.15)] backdrop-blur-xl sm:p-8">
+    <div className="w-full max-w-4xl rounded-3xl border border-cyan-400/20 bg-slate-950/80 p-4 shadow-[0_0_40px_rgba(34,211,238,0.15)] backdrop-blur-xl sm:p-8">
+      
+      {/* Header */}
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.35em] text-cyan-300/80">
@@ -79,11 +98,26 @@ function Dashboard() {
             Trade Dashboard
           </h1>
         </div>
-        <div className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-sm text-cyan-200">
-          Auto-refresh every 15 min
+        
+        {/* Live Badge */}
+        <div className="flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1.5 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
+          </span>
+          <span className="text-sm font-semibold uppercase tracking-wider text-red-300">
+            Live
+          </span>
         </div>
       </div>
-      <CoinSelector />
+
+      {/* Coin Selector */}
+      <CoinSelector activeCoin={activeCoin} onSelectCoin={setActiveCoin} />
+
+      {/* Price Chart (CoinGecko) */}
+      <PriceChart activeCoin={activeCoin} />
+
+      {/* Trade Data */}
       {isLoading ? (
         <div className="flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-cyan-400/20 bg-slate-900/70">
           <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-cyan-400/20 border-t-cyan-300 shadow-[0_0_30px_rgba(34,211,238,0.35)]" />
@@ -105,121 +139,89 @@ function Dashboard() {
           </p>
         </div>
       ) : (
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={JSON.stringify(data)}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.35, ease: 'easeOut' }}
-          >
-            <TradeCard data={data} />
-          </motion.div>
-        </AnimatePresence>
+        <div className="flex flex-col gap-6">
+          <TradeList trades={data} />
+          <SummaryCard trades={data} />
+        </div>
       )}
     </div>
   )
 }
 
-function TradeCard({ data }) {
-  const trade = data?.data ?? data
-  const payload = Array.isArray(trade) ? trade[0] : trade
+// Trade Listesi (Row Row)
+function TradeList({ trades }) {
+  return (
+    <div className="flex flex-col gap-4">
+      <AnimatePresence mode="popLayout">
+        {trades.map((trade, index) => (
+          <TradeRow key={trade.id || index} trade={trade} index={index} />
+        ))}
+      </AnimatePresence>
+    </div>
+  )
+}
 
-  const orderRef = payload?.order_ref ?? payload?.orderRef ?? '—'
-  const profit = payload?.profit ?? null
-  const buyPrice = payload?.buy_price ?? payload?.buyPrice ?? null
-  const sellPrice = payload?.sell_price ?? payload?.sellPrice ?? null
-  const buyTime = payload?.buy_time ?? payload?.buyTime ?? null
-  const sellTime = payload?.sell_time ?? payload?.sellTime ?? null
-  const duration = payload?.duration ?? null
-  const signalType = payload?.last_signal_type ?? payload?.lastSignalType ?? null
-  const signalVolume = payload?.last_signal_volume ?? payload?.lastSignalVolume ?? null
-
+function TradeRow({ trade, index }) {
+  const profit = trade.profit ?? 0
+  const profitClass = profit > 0 ? 'text-emerald-400' : profit < 0 ? 'text-rose-400' : 'text-slate-100'
+  
   const formatValue = (value) => {
-    if (value === null || value === undefined || value === '') {
-      return '—'
-    }
-    if (typeof value === 'number') {
-      return value.toLocaleString()
-    }
+    if (value === null || value === undefined || value === '') return '—'
+    if (typeof value === 'number') return value.toLocaleString()
     return value
   }
-
-  const profitClass = profit > 0 ? 'text-emerald-400' : profit < 0 ? 'text-rose-400' : 'text-slate-100'
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="group relative overflow-hidden rounded-2xl border border-cyan-400/30 bg-slate-900/60 p-5 shadow-[0_0_40px_rgba(34,211,238,0.14)] backdrop-blur-xl sm:p-6"
+      transition={{ duration: 0.35, ease: 'easeOut', delay: index * 0.05 }}
+      className="group relative overflow-hidden rounded-2xl border border-cyan-400/20 bg-slate-900/60 p-4 shadow-[0_0_20px_rgba(34,211,238,0.08)] backdrop-blur-xl transition-all duration-300 hover:border-cyan-400/40 hover:shadow-[0_0_30px_rgba(34,211,238,0.15)]"
     >
-      <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_46%)]" />
-      <div className="pointer-events-none absolute inset-0 rounded-2xl before:absolute before:inset-[-1px] before:rounded-2xl before:bg-[linear-gradient(115deg,rgba(34,211,238,0.2),rgba(34,211,238,0.02),rgba(34,211,238,0.35))] before:opacity-70 before:transition-opacity before:duration-300 before:content-[''] before:animate-[spin_8s_linear_infinite] group-hover:before:opacity-100" />
-      <div className="relative z-10">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-cyan-300/70">
-              Active trade
-            </p>
-            <h2 className="mt-1 text-xl font-semibold text-white sm:text-2xl">{orderRef}</h2>
-            <p className="mt-2 text-sm text-slate-400">Futuristic execution snapshot</p>
+      <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.1),transparent_50%)]" />
+      
+      <div className="relative z-10 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6 items-center">
+        
+        {/* PROFIT */}
+        <div className="flex flex-col justify-center border-r border-white/10 pr-4">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-1">Profit</p>
+          <p className={`text-xl font-bold font-mono ${profitClass} drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]`}>
+            {profit > 0 ? '+' : ''}{formatValue(profit)}
+          </p>
+        </div>
+
+        {/* PRICES */}
+        <div className="flex flex-col justify-center border-r border-white/10 pr-4">
+          <div className="mb-1">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Sell Price</p>
+            <p className="text-sm font-semibold font-mono text-cyan-200">{formatValue(trade.sell_price)}</p>
           </div>
-          <div className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-sm text-cyan-200">
-            Live
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Buy Price</p>
+            <p className="text-sm font-semibold font-mono text-cyan-200">{formatValue(trade.buy_price)}</p>
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Profit</p>
-            <p className={`mt-2 text-lg font-semibold font-mono ${profitClass}`}>
-              {profit !== null ? `${profit > 0 ? '+' : ''}${formatValue(profit)}` : '—'}
-            </p>
+        {/* TIMES */}
+        <div className="flex flex-col justify-center border-r border-white/10 pr-4">
+          <div className="mb-1">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Sell Time</p>
+            <p className="text-sm font-semibold font-mono text-cyan-200">{formatValue(trade.sell_time)}</p>
           </div>
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Buy price</p>
-            <p className="mt-2 text-lg font-semibold font-mono text-cyan-200">
-              {formatValue(buyPrice)}
-            </p>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Sell price</p>
-            <p className="mt-2 text-lg font-semibold font-mono text-cyan-200">
-              {formatValue(sellPrice)}
-            </p>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Duration</p>
-            <p className="mt-2 text-lg font-semibold font-mono text-cyan-200">
-              {formatValue(duration)}
-            </p>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Buy time</p>
-            <p className="mt-2 text-lg font-semibold font-mono text-cyan-200">
-              {formatValue(buyTime)}
-            </p>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Sell time</p>
-            <p className="mt-2 text-lg font-semibold font-mono text-cyan-200">
-              {formatValue(sellTime)}
-            </p>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Last signal</p>
-            <p className="mt-2 text-lg font-semibold font-mono text-cyan-200">
-              {formatValue(signalType)}
-            </p>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Signal volume</p>
-            <p className="mt-2 text-lg font-semibold font-mono text-cyan-200">
-              {formatValue(signalVolume)}
-            </p>
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Buy Time</p>
+            <p className="text-sm font-semibold font-mono text-cyan-200">{formatValue(trade.buy_time)}</p>
           </div>
         </div>
+
+        {/* DURATION */}
+        <div className="flex flex-col justify-center">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-1">Duration</p>
+          <p className="text-lg font-bold font-mono text-cyan-100">
+            {formatValue(trade.duration)}
+          </p>
+        </div>
+
       </div>
     </motion.div>
   )
