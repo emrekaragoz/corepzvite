@@ -1,10 +1,30 @@
 import React from 'react'
 
 const COINS = [
-  { id: 'BTC', label: 'BTC', locked: false },
-  { id: 'XRP', label: 'XRP', locked: true },
-  { id: 'BNB', label: 'BNB', locked: true },
-  { id: 'TRX', label: 'TRX', locked: true },
+  { 
+    id: 'BTC', 
+    label: 'BTC', 
+    locked: false,
+    icon: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/btc.png'
+  },
+  { 
+    id: 'XRP', 
+    label: 'XRP', 
+    locked: true,
+    icon: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/xrp.png'
+  },
+  { 
+    id: 'BNB', 
+    label: 'BNB', 
+    locked: true,
+    icon: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/bnb.png'
+  },
+  { 
+    id: 'TRX', 
+    label: 'TRX', 
+    locked: true,
+    icon: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/trx.png'
+  },
 ]
 
 function LockIcon({ className }) {
@@ -33,7 +53,7 @@ function CoinSelector({ activeCoin, onSelectCoin }) {
   }
 
   return (
-    <div className="mb-8 flex justify-center">
+    <div className="flex justify-center">
       <div className="inline-flex items-center gap-1 rounded-full border border-cyan-500/20 bg-slate-900/60 p-1 backdrop-blur-md shadow-[0_0_20px_rgba(34,211,238,0.08)]">
         {COINS.map((coin) => {
           const isActive = activeCoin === coin.id
@@ -45,7 +65,7 @@ function CoinSelector({ activeCoin, onSelectCoin }) {
               type="button"
               disabled={isLocked}
               onClick={() => handleSelect(coin)}
-              className={`relative flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all duration-300 ${
+              className={`relative flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-all duration-300 sm:px-4 sm:py-1.5 ${
                 isActive
                   ? 'bg-cyan-500/15 text-cyan-200 border border-cyan-400/30 shadow-[0_0_12px_rgba(34,211,238,0.15)]'
                   : 'text-slate-500 border border-transparent'
@@ -55,8 +75,14 @@ function CoinSelector({ activeCoin, onSelectCoin }) {
                   : 'cursor-pointer hover:bg-cyan-500/10 hover:text-cyan-300'
               }`}
             >
-              {isLocked && <LockIcon className="h-3 w-3 opacity-60" />}
+              {/* ✅ Coin Icon */}
+              <img 
+                src={coin.icon} 
+                alt={coin.label}
+                className="h-4 w-4 rounded-full object-cover"
+              />
               <span>{coin.label}</span>
+              {isLocked && <LockIcon className="h-3 w-3 opacity-60" />}
             </button>
           )
         })}
