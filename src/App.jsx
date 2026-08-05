@@ -1,61 +1,16 @@
 import React, { useState } from 'react'
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
-import { AnimatePresence, motion } from 'framer-motion'
 import Footer from './components/Footer'
 import CoinSelector from './components/CoinSelector'
 import PriceChart from './components/PriceChart'
 import SummaryCard from './components/SummaryCard'
-import CryptoNews from './components/CryptoNews'
 import SubscribeCard from './components/SubscribeCard'
+import CryptoNews from './components/CryptoNews'
+import TradeList from './components/TradeList'
+import PositionCard from './components/PositionCard' 
 
-// ✅ Satış Emirleri
-const SELL_ORDERS = [
-  {
-    id: 1,
-    order_ref: "BTC-USDT-1A2B3C",
-    profit: 1000,
-    buy_price: 10000,
-    sell_price: 11000,
-    buy_time: "2026-07-04 09:15:22",
-    sell_time: "2026-07-04 11:42:05",
-    duration: "2h 26m",
-    last_signal_type: "RSI Cross",
-    last_signal_volume: 1200000
-  },
-  {
-    id: 2,
-    order_ref: "BTC-USDT-4D5E6F",
-    profit: -500,
-    buy_price: 10000,
-    sell_price: 9500,
-    buy_time: "2026-08-01 13:00:00",
-    sell_time: "2026-08-01 13:15:45",
-    duration: "15m 45s",
-    last_signal_type: "Breakout Failed",
-    last_signal_volume: 850000
-  },
-  {
-    id: 3,
-    order_ref: "BTC-USDT-7G8H9I",
-    profit: 800,
-    buy_price: 10000,
-    sell_price: 10800,
-    buy_time: "2026-08-04 14:20:10",
-    sell_time: "2026-08-04 14:45:30",
-    duration: "25m 20s",
-    last_signal_type: "EMA Cross",
-    last_signal_volume: 450000
-  }
-]
-
-// ✅ Alım Emri (TEK)
-const MOCK_BUY = {
-  order_ref: "BTC-USDT",
-  buy_price: 10000,
-  buy_time: "2026-08-03 09:15:22",
-}
-
-const TRADE_URL = 'http://localhost:8000/api/trade'
+// ✅ API URL'leri
+const API_BASE = 'http://localhost:8000'
 
 function App() {
   const [queryClient] = useState(() => new QueryClient())
@@ -75,15 +30,28 @@ function App() {
 function Dashboard() {
   const [activeCoin, setActiveCoin] = useState('BTC')
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['trade', activeCoin],
+  // ✅ TRADE GEÇMİŞİ (Server'dan)
+  const { data: trades, isLoading: isLoadingTrades, error: tradesError } = useQuery({
+    queryKey: ['trades', activeCoin],
     queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 800))
-      return SELL_ORDERS
-    },
-    refetchInterval: 900000,
-    staleTime: 900000,
+      const response = await fetch(`${API_BASE}/api/trades`)
+      if (!response.ok) throw new Error('Failed to fetch trades')
+      return response.json()
+    }
   })
+
+  // ✅ AKTİF POZİSYON (Server'dan)
+  const { data: activePosition, isLoading: isLoadingPosition } = useQuery({
+    queryKey: ['position', activeCoin],
+    queryFn: async () => {
+      const response = await fetch(`${API_BASE}/api/position`)
+      if (!response.ok) throw new Error('Failed to fetch position')
+      return response.json()
+    }
+  })
+
+  const isLoading = isLoadingTrades || isLoadingPosition
+  const error = tradesError
 
   return (
     <div className="w-full max-w-4xl rounded-3xl border border-cyan-400/20 bg-slate-950/80 p-3 shadow-[0_0_40px_rgba(34,211,238,0.15)] backdrop-blur-xl sm:p-5">
@@ -117,9 +85,28 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Price Chart */}
+      {/* Price Chart + Aktif Pozisyon */}
       <div className="mb-4">
-        <PriceChart activeCoin={activeCoin} buyOrder={MOCK_BUY} />
+        {activePosition && activePosition.buy_time ? (
+          // ✅ Pozisyon var: Grid layout (3/4 PriceChart + 1/4 PositionCard)
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="md:col-span-3">
+              <PriceChart 
+                activeCoin={activeCoin} 
+                buyOrder={activePosition} 
+              />
+            </div>
+            <div className="md:col-span-1">
+              <PositionCard position={activePosition} />
+            </div>
+          </div>
+        ) : (
+          // ✅ Pozisyon yok: PriceChart tam genişlik
+          <PriceChart 
+            activeCoin={activeCoin} 
+            buyOrder={null} 
+          />
+        )}
       </div>
 
       {/* Trade Data */}
@@ -128,7 +115,7 @@ function Dashboard() {
           <div className="mb-3 h-10 w-10 animate-spin rounded-full border-4 border-cyan-400/20 border-t-cyan-300 shadow-[0_0_30px_rgba(34,211,238,0.35)]" />
           <p className="text-base font-medium text-cyan-100">Syncing trade feed...</p>
           <p className="mt-1 text-sm text-slate-400">
-            Initializing the latest market snapshot
+            Connecting to server at localhost:8000
           </p>
         </div>
       ) : error ? (
@@ -136,100 +123,25 @@ function Dashboard() {
           <div className="mb-2 flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.8)]" />
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-red-300">
-              Connection issue
+              Server Connection Issue
             </p>
           </div>
           <p className="text-base">
-            {error.message || 'Unable to load trade data right now.'}
+            {error.message || 'Unable to connect to backend server.'}
+          </p>
+          <p className="mt-1 text-xs text-red-400/70">
+            Make sure `python api_server.py` is running on port 8000
           </p>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <TradeList trades={data} />
-          <SummaryCard trades={data} />
+          <TradeList trades={trades || []} />
+          <SummaryCard trades={trades || []} />
           <SubscribeCard />
-          <CryptoNews />  
+          <CryptoNews />
         </div>
       )}
     </div>
-  )
-}
-
-function TradeList({ trades }) {
-  return (
-    <div className="flex flex-col gap-3">
-      <AnimatePresence mode="popLayout">
-        {trades.map((trade, index) => (
-          <TradeRow key={trade.id || index} trade={trade} index={index} />
-        ))}
-      </AnimatePresence>
-    </div>
-  )
-}
-
-function TradeRow({ trade, index }) {
-  const profit = trade.profit ?? 0
-  const profitClass = profit > 0 ? 'text-emerald-400' : profit < 0 ? 'text-rose-400' : 'text-slate-100'
-  
-  const formatValue = (value) => {
-    if (value === null || value === undefined || value === '') return '—'
-    if (typeof value === 'number') return value.toLocaleString()
-    return value
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: 'easeOut', delay: index * 0.05 }}
-      className="group relative overflow-hidden rounded-2xl border border-cyan-400/20 bg-slate-900/60 p-3 shadow-[0_0_20px_rgba(34,211,238,0.08)] backdrop-blur-xl transition-all duration-300 hover:border-cyan-400/40 hover:shadow-[0_0_30px_rgba(34,211,238,0.15)] sm:p-4"
-    >
-      <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.1),transparent_50%)]" />
-      
-      <div className="relative z-10 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4 items-center">
-        
-        {/* PROFIT */}
-        <div className="flex flex-col justify-center border-r border-white/10 pr-3">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-1">Profit</p>
-          <p className={`text-lg font-bold font-mono ${profitClass} drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]`}>
-            {profit > 0 ? '+' : ''}{formatValue(profit)}
-          </p>
-        </div>
-
-        {/* PRICES */}
-        <div className="flex flex-col justify-center border-r border-white/10 pr-3">
-          <div className="mb-1">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Sell Price</p>
-            <p className="text-sm font-semibold font-mono text-cyan-200">{formatValue(trade.sell_price)}</p>
-          </div>
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Buy Price</p>
-            <p className="text-sm font-semibold font-mono text-cyan-200">{formatValue(trade.buy_price)}</p>
-          </div>
-        </div>
-
-        {/* TIMES */}
-        <div className="flex flex-col justify-center border-r border-white/10 pr-3">
-          <div className="mb-1">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Sell Time</p>
-            <p className="text-sm font-semibold font-mono text-cyan-200">{formatValue(trade.sell_time)}</p>
-          </div>
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Buy Time</p>
-            <p className="text-sm font-semibold font-mono text-cyan-200">{formatValue(trade.buy_time)}</p>
-          </div>
-        </div>
-
-        {/* DURATION */}
-        <div className="flex flex-col justify-center">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-1">Duration</p>
-          <p className="text-base font-bold font-mono text-cyan-100">
-            {formatValue(trade.duration)}
-          </p>
-        </div>
-
-      </div>
-    </motion.div>
   )
 }
 

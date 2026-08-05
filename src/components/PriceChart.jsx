@@ -28,20 +28,74 @@ const COIN_MAP = {
   }
 }
 
-// ✅ Aşağı bakan üçgen SVG (URL encoded)
-//const TRIANGLE_DOWN_SVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 8.5L1 2.5h8z' fill='%234ade80'/%3E%3C/svg%3E`
-
 function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
   const [chartData, setChartData] = useState([])
+  const [rawBinanceData, setRawBinanceData] = useState([]) // ✅ Raw data'yı sakla
   const [coinInfo, setCoinInfo] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [annotations, setAnnotations] = useState({})
   const [currentProfit, setCurrentProfit] = useState(null)
 
+  // 1️⃣ Data fetch - sadece coin değiştiğinde
   useEffect(() => {
     fetchChartData()
   }, [activeCoin])
+
+  // 2️⃣ ✅ Annotations update - buyOrder veya chartData değiştiğinde
+  useEffect(() => {
+    if (!buyOrder || rawBinanceData.length === 0) {
+      setAnnotations({})
+      setCurrentProfit(null)
+      return
+    }
+
+    console.log('🔍 Buy order received:', buyOrder)
+    console.log('🔍 Raw data length:', rawBinanceData.length)
+
+    const buyTime = new Date(buyOrder.buy_time).getTime()
+    console.log('🔍 Buy time timestamp:', buyTime, '->', new Date(buyTime).toISOString())
+
+    // Buy time'a en yakın mum'u bul
+    const nearestCandle = rawBinanceData.reduce((prev, curr) => {
+      return (Math.abs(curr[0] - buyTime) < Math.abs(prev[0] - buyTime)) ? curr : prev
+    })
+
+    console.log('🔍 Nearest candle:', nearestCandle)
+
+    // Üçgen mumun ÜSTÜNDE olsun (high price)
+    const markerPrice = parseFloat(nearestCandle[2])
+
+    setAnnotations({
+      xaxis: [{
+        x: buyTime,
+        borderColor: '#4ade80',
+        strokeWidth: 1.5,
+        strokeDashArray: 4,
+        label: {
+          text: 'BUY',
+          position: 'top',
+          offsetY: -8,
+          style: {
+            color: '#ffffff',
+            background: '#4ade80',
+            fontSize: '9px',
+            fontWeight: 'bold',
+            padding: { left: 4, right: 4, top: 2, bottom: 2 },
+            borderRadius: 3,
+          }
+        }
+      }]
+    })
+
+    // Current Profit hesapla
+    const lastCandle = rawBinanceData[rawBinanceData.length - 1]
+    const currentPrice = parseFloat(lastCandle[4])
+    const profit = ((currentPrice - buyOrder.buy_price) / buyOrder.buy_price) * 100
+    setCurrentProfit(profit)
+
+    console.log('✅ Annotations set. Current profit:', profit.toFixed(2) + '%')
+  }, [buyOrder, rawBinanceData]) // ✅ Her ikisini de izle
 
   const fetchChartData = async () => {
     setIsLoading(true)
@@ -61,6 +115,9 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
       
       const data = await response.json()
       
+      // ✅ Raw data'yı sakla (annotations için)
+      setRawBinanceData(data)
+      
       const formattedData = data.map(candle => ({
         x: new Date(candle[0]),
         y: [
@@ -72,52 +129,6 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
       }))
       
       setChartData(formattedData)
-      
-      // ✅ BUY ORDER ANNOTATIONS
-      if (buyOrder && data.length > 0) {
-        const buyTime = new Date(buyOrder.buy_time).getTime()
-        
-        // Buy time'a en yakın mum'u bul
-        const nearestCandle = data.reduce((prev, curr) => {
-          return (Math.abs(curr[0] - buyTime) < Math.abs(prev[0] - buyTime)) ? curr : prev
-        })
-        
-        // ✅ Üçgen mumun ÜSTÜNDE olsun (high price)
-        const markerPrice = parseFloat(nearestCandle[2])
-        
-        setAnnotations({
-          xaxis: [{
-            x: buyTime,
-            borderColor: '#4ade80',
-            strokeWidth: 1.5,
-            strokeDashArray: 4,
-            label: {
-              text: 'BUY',
-              position: 'top',
-              offsetY: -8,
-              style: {
-                color: '#ffffff',
-                background: '#4ade80',
-                fontSize: '9px',
-                fontWeight: 'bold',
-                padding: { left: 4, right: 4, top: 2, bottom: 2 },
-                borderRadius: 3,
-              }
-            }
-          }]
-        })
-        
-        // ✅ Current Profit hesapla
-        if (data.length > 0) {
-          const lastCandle = data[data.length - 1]
-          const currentPrice = parseFloat(lastCandle[4])
-          const profit = ((currentPrice - buyOrder.buy_price) / buyOrder.buy_price) * 100
-          setCurrentProfit(profit)
-        }
-      } else {
-        setAnnotations({})
-        setCurrentProfit(null)
-      }
       
       // Coin bilgisi
       if (data.length > 0) {
@@ -225,7 +236,6 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
     data: chartData
   }]
 
-  // ✅ Profit renk sınıfı
   const profitColor = currentProfit !== null
     ? currentProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'
     : 'text-slate-400'
@@ -233,24 +243,20 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
   return (
     <div className="bg-slate-900/40 px-4 py-3 backdrop-blur-sm">
       
-      {/* ✅ ÜST BİLGİ - TEK SATIR */}
+      {/* ÜST BİLGİ */}
       <div className="mb-3 flex items-center justify-between">
         
         {/* Sol: Sembol + Price + 24h */}
         <div className="flex items-center gap-3">
-          {/* Sembol */}
-          <div className="flex items-center gap-2">
-            <img 
-              src={COIN_MAP[activeCoin]?.icon} 
-              alt={coinInfo?.symbol || 'coin'}
-              className="h-6 w-6 rounded-full object-cover"
-            />
-            <span className="text-sm font-semibold text-white">
-              {coinInfo?.symbol || '...'}/USDT
-            </span>
-          </div>
+          <img 
+            src={COIN_MAP[activeCoin]?.icon} 
+            alt={coinInfo?.symbol || 'coin'}
+            className="h-6 w-6 rounded-full object-cover"
+          />
+          <span className="text-sm font-semibold text-white">
+            {coinInfo?.symbol || '...'}/USDT
+          </span>
           
-          {/* Price + 24h */}
           {coinInfo && (
             <div className="flex items-center gap-2">
               <span className="text-lg font-bold font-mono text-white">

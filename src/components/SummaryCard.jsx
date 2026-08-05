@@ -49,8 +49,8 @@ function SummaryCard({ trades }) {
 
     // Sırayla compound uygula
     sortedTrades.forEach(trade => {
-      const profitPercentage = trade.profit / trade.buy_price
-      currentAmount = currentAmount * (1 + profitPercentage)
+      let profitPercentage = trade.profit * currentAmount / 100
+      currentAmount = currentAmount + profitPercentage
     })
 
     const profit = currentAmount - initialAmount
