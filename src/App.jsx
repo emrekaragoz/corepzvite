@@ -62,7 +62,7 @@ function Dashboard() {
         {/* Sol: Trade Dashboard */}
         <div className="flex-1 flex justify-start">
           <p className="text-sm font-medium uppercase tracking-[0.35em] text-cyan-300/80 whitespace-nowrap">
-            Trade Dashboard
+            Dashboard
           </p>
         </div>
         
