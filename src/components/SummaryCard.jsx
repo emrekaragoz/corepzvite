@@ -85,17 +85,16 @@ function SummaryCard({ trades }) {
   }
 
   return (
-    <div className="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-900/40 px-4 py-3 backdrop-blur-sm">
-      <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-sm leading-relaxed">
+    <div className="mt-6 rounded-2xl border border-cyan-500/20 bg-slate-900/40 px-3 py-3 backdrop-blur-sm sm:px-4">
+      <div className="flex flex-col items-center gap-2 text-center text-sm leading-relaxed sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-1.5 sm:gap-y-1">
         <span className="text-slate-300">If you had invested</span>
         <span className="font-medium text-cyan-300">$100,000</span>
         <span className="text-slate-300">in the last</span>
         
-        {/* Inline Dropdown */}
         <select
           value={timeframe}
           onChange={(e) => setTimeframe(e.target.value)}
-          className="cursor-pointer rounded-md border border-cyan-500/30 bg-slate-950/80 px-2 py-0.5 text-sm font-medium text-cyan-100 outline-none transition-all focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20"
+          className="w-full cursor-pointer rounded-md border border-cyan-500/30 bg-slate-950/80 px-2 py-0.5 text-sm font-medium text-cyan-100 outline-none transition-all focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 sm:w-auto"
         >
           {timeframes.map((tf) => (
             <option key={tf.id} value={tf.id}>

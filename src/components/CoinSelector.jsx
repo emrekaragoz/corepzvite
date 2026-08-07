@@ -53,8 +53,8 @@ function CoinSelector({ activeCoin, onSelectCoin }) {
   }
 
   return (
-    <div className="flex justify-center">
-      <div className="inline-flex items-center gap-1 rounded-full border border-cyan-500/20 bg-slate-900/60 p-1 backdrop-blur-md shadow-[0_0_20px_rgba(34,211,238,0.08)]">
+    <div className="w-full max-w-full overflow-x-auto">
+      <div className="mx-auto flex w-max items-center gap-1 rounded-full border border-cyan-500/20 bg-slate-900/60 p-1 backdrop-blur-md shadow-[0_0_20px_rgba(34,211,238,0.08)] sm:w-auto sm:flex-wrap sm:justify-center">
         {COINS.map((coin) => {
           const isActive = activeCoin === coin.id
           const isLocked = coin.locked
@@ -65,17 +65,16 @@ function CoinSelector({ activeCoin, onSelectCoin }) {
               type="button"
               disabled={isLocked}
               onClick={() => handleSelect(coin)}
-              className={`relative flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-all duration-300 sm:px-4 sm:py-1.5 ${
+              className={`relative flex min-w-max items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider transition-all duration-300 sm:px-4 sm:py-1.5 sm:text-xs ${
                 isActive
-                  ? 'bg-cyan-500/15 text-cyan-200 border border-cyan-400/30 shadow-[0_0_12px_rgba(34,211,238,0.15)]'
-                  : 'text-slate-500 border border-transparent'
+                  ? 'border border-cyan-400/30 bg-cyan-500/15 text-cyan-200 shadow-[0_0_12px_rgba(34,211,238,0.15)]'
+                  : 'border border-transparent text-slate-500'
               } ${
                 isLocked 
                   ? 'cursor-not-allowed opacity-70' 
                   : 'cursor-pointer hover:bg-cyan-500/10 hover:text-cyan-300'
               }`}
             >
-              {/* ✅ Coin Icon */}
               <img 
                 src={coin.icon} 
                 alt={coin.label}

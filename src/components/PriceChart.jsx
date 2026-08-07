@@ -241,13 +241,13 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
     : 'text-slate-400'
 
   return (
-    <div className="bg-slate-900/40 px-4 py-3 backdrop-blur-sm">
+    <div className="bg-slate-900/40 px-3 py-3 backdrop-blur-sm sm:px-4">
       
       {/* ÜST BİLGİ */}
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         
         {/* Sol: Sembol + Price + 24h */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <img 
             src={COIN_MAP[activeCoin]?.icon} 
             alt={coinInfo?.symbol || 'coin'}
@@ -258,8 +258,8 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
           </span>
           
           {coinInfo && (
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold font-mono text-white">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-base font-bold font-mono text-white sm:text-lg">
                 ${coinInfo.currentPrice.toLocaleString(undefined, { 
                   minimumFractionDigits: 2, 
                   maximumFractionDigits: 2 
@@ -275,7 +275,7 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
         </div>
         
         {/* Sağ: Current Profit */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2 rounded-lg bg-slate-950/50 px-2 py-1 sm:justify-end">
           <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
             Current Profit
           </span>

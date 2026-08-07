@@ -23,11 +23,11 @@ function SubscribeCard() {
   }
 
   return (
-    <div className="mt-6 rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-cyan-950/40 p-6 backdrop-blur-sm">
+    <div className="mt-6 rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-cyan-950/40 p-4 backdrop-blur-sm sm:p-6">
 
       {/* Başlık */}
       <div className="mb-2 text-center">
-        <h3 className="text-lg font-semibold text-white">
+        <h3 className="text-base font-semibold text-white sm:text-lg">
           Stay Ahead of the Market
         </h3>
         <p className="mt-1 text-sm text-slate-400">
@@ -49,10 +49,10 @@ function SubscribeCard() {
           <button
             type="submit"
             disabled={isSubmitting || isSuccess}
-            className={`rounded-xl px-6 py-2.5 text-sm font-semibold uppercase tracking-wider transition-all duration-300 ${
+            className={`w-full rounded-xl px-6 py-2.5 text-sm font-semibold uppercase tracking-wider transition-all duration-300 sm:w-auto ${
               isSuccess
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                : 'bg-cyan-500/20 text-cyan-200 border border-cyan-500/30 hover:bg-cyan-500/30 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]'
+                ? 'border border-emerald-500/30 bg-emerald-500/20 text-emerald-300'
+                : 'border border-cyan-500/30 bg-cyan-500/20 text-cyan-200 hover:bg-cyan-500/30 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]'
             } ${
               isSubmitting || isSuccess ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'
             }`}

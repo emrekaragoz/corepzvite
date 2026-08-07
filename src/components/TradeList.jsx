@@ -1,20 +1,27 @@
 import React from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
-// ✅ Duration string'ini HH:MM formatına çevirir
+// ✅ Duration string'ini "18hours 15mins" formatına çevirir
 const formatDuration = (durationStr) => {
   if (!durationStr || durationStr === 'N/A' || durationStr === '') return '—'
-  
+
+  const normalized = String(durationStr).trim()
+
+  if (/^\d{1,2}:\d{2}:\d{2}$/.test(normalized)) {
+    const [hours, minutes] = normalized.split(':').map(Number)
+    return `${hours} hours ${minutes} mins`
+  }
+
   let hours = 0
   let minutes = 0
-  
-  const hourMatch = durationStr.match(/(\d+)h/)
-  const minMatch = durationStr.match(/(\d+)m/)
-  
-  if (hourMatch) hours = parseInt(hourMatch[1])
-  if (minMatch) minutes = parseInt(minMatch[1])
-  
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+
+  const hourMatch = normalized.match(/(\d+)h/)
+  const minMatch = normalized.match(/(\d+)m/)
+
+  if (hourMatch) hours = parseInt(hourMatch[1], 10)
+  if (minMatch) minutes = parseInt(minMatch[1], 10)
+
+  return `${hours} hours ${minutes} mins`
 }
 
 function TradeList({ trades }) {
@@ -75,18 +82,18 @@ function TradeRow({ trade, index }) {
     >
       <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.1),transparent_50%)]" />
       
-      <div className="relative z-10 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4 items-center">
+      <div className="relative z-10 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4 md:gap-4">
         
         {/* PROFIT */}
-        <div className="flex flex-col justify-center border-r border-white/10 pr-3">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-1">Profit</p>
+        <div className="flex flex-col justify-center border-b border-white/10 pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-3">
+          <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-slate-400">Profit</p>
           <p className={`text-lg font-bold font-mono ${profitClass} drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]`}>
-            {profit > 0 ? '+' : ''}{formatValue(profit)}
+            {profit > 0 ? '+' : '-'}{formatValue(profit)}{"%"}
           </p>
         </div>
 
         {/* PRICES */}
-        <div className="flex flex-col justify-center border-r border-white/10 pr-3">
+        <div className="flex flex-col justify-center border-b border-white/10 pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-3">
           <div className="mb-1">
             <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Sell Price</p>
             <p className="text-sm font-semibold font-mono text-cyan-200">{formatValue(trade.sell_price)}</p>
@@ -98,7 +105,7 @@ function TradeRow({ trade, index }) {
         </div>
 
         {/* TIMES */}
-        <div className="flex flex-col justify-center border-r border-white/10 pr-3">
+        <div className="flex flex-col justify-center border-b border-white/10 pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-3">
           <div className="mb-1">
             <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Sell Time</p>
             <p className="text-sm font-semibold font-mono text-cyan-200">{formatValue(trade.sell_time)}</p>
@@ -109,9 +116,9 @@ function TradeRow({ trade, index }) {
           </div>
         </div>
 
-        {/* DURATION - ✅ HH:MM formatında */}
+        {/* DURATION */}
         <div className="flex flex-col justify-center">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-1">Duration</p>
+          <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-slate-400">Duration</p>
           <p className="text-base font-bold font-mono text-cyan-100">
             {formatDuration(trade.duration)}
           </p>

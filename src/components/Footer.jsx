@@ -3,19 +3,12 @@ import React from 'react'
 function Footer() {
   return (
     <footer className="mt-auto w-full border-t border-cyan-500/10 bg-slate-950/40 backdrop-blur-xl">
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-center gap-3 text-center text-[11px] font-medium uppercase tracking-[0.25em] text-slate-500 sm:flex-row sm:gap-4">
-          
+      <div className="mx-auto max-w-6xl px-3 py-5 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-center justify-center gap-2 text-center text-[10px] font-medium uppercase tracking-[0.25em] text-slate-500 sm:gap-4 sm:text-[11px]">
           <span>© 2026 Copyright</span>
-          
-          {/* Yatay Ayırıcı (Desktop'ta görünür) */}
           <span className="hidden h-3 w-px bg-cyan-500/30 sm:block" />
-          
           <span>Emre Karagöz</span>
-          
-          {/* Yatay Ayırıcı (Desktop'ta görünür) */}
           <span className="hidden h-3 w-px bg-cyan-500/30 sm:block" />
-          
           <a
             href="https://emrekaragoz.dev"
             target="_blank"
@@ -24,7 +17,6 @@ function Footer() {
           >
             DEV.KARAGOZ@GMAIL.COM
           </a>
-
         </div>
       </div>
     </footer>
