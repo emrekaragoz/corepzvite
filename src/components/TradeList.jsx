@@ -64,14 +64,25 @@ function TradeList({ trades }) {
 }
 
 function TradeRow({ trade, index }) {
-  const profit = trade.profit ?? 0
+  const numericProfit = Number(trade.profit ?? 0)
+  const profit = Number.isFinite(numericProfit) ? numericProfit : 0
   const profitClass = profit > 0 ? 'text-emerald-400' : profit < 0 ? 'text-rose-400' : 'text-slate-100'
   
   const formatValue = (value) => {
     if (value === null || value === undefined || value === '') return '—'
-    if (typeof value === 'number') return value.toLocaleString()
+
+    const numericValue = Number(value)
+    if (Number.isFinite(numericValue)) {
+      return numericValue.toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      })
+    }
+
     return value
   }
+
+  const profitDisplay = `${profit < 0 ? '-' : '+'}${formatValue(Math.abs(profit))}%`
 
   return (
     <motion.div
@@ -88,7 +99,7 @@ function TradeRow({ trade, index }) {
         <div className="flex flex-col justify-center border-b border-white/10 pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-3">
           <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-slate-400">Profit</p>
           <p className={`text-lg font-bold font-mono ${profitClass} drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]`}>
-            {profit > 0 ? '+' : ''}{formatValue(profit)}{"%"}
+            {profit > 0 ? '+' : '-'}{formatValue(profit)}{"%"}
           </p>
         </div>
 
