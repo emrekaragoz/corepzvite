@@ -63,20 +63,26 @@ function Dashboard() {
   return (
     <div className="w-full rounded-3xl border border-cyan-400/20 bg-slate-950/80 p-3 shadow-[0_0_40px_rgba(34,211,238,0.15)] backdrop-blur-xl sm:p-5">
       
-      {/* HEADER - TEK SATIR (AYNI) */}
-      <div className="mb-4 flex items-center">
-        <div className="flex-1 flex justify-start">
-          <p className="text-sm font-medium uppercase tracking-[0.35em] text-cyan-300/80 whitespace-nowrap">
+      {/* HEADER: Mobilde dikey, Desktop'ta yatay */}
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        
+        {/* Üst (mobil) / Sol (desktop): Icon + Trade Dashboard */}
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-500/5 border border-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.3)]">
+            <img 
+              src={icon} 
+              alt="Logo" 
+              className="h-6 w-6" 
+            />
+          </div>
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300/90 whitespace-nowrap">
             Trade Dashboard
           </p>
         </div>
         
+        {/* Alt (mobil) / Sağ (desktop): CoinSelector */}
         <div className="flex-none">
           <CoinSelector activeCoin={activeCoin} onSelectCoin={setActiveCoin} />
-        </div>
-        
-        <div className="ml-3 flex items-center justify-center">
-          <img src={icon} alt="Logo" className="h-6 w-6" />
         </div>
       </div>
 
