@@ -30,40 +30,36 @@ const COIN_MAP = {
 
 function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
   const [chartData, setChartData] = useState([])
-  const [rawBinanceData, setRawBinanceData] = useState([]) // ✅ Raw data'yı sakla
+  const [rawBinanceData, setRawBinanceData] = useState([])
   const [coinInfo, setCoinInfo] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [annotations, setAnnotations] = useState({})
-  const [currentProfit, setCurrentProfit] = useState(null)
 
-  // 1️⃣ Data fetch - sadece coin değiştiğinde
+  // Data fetch
   useEffect(() => {
     fetchChartData()
   }, [activeCoin])
 
-  // 2️⃣ ✅ Annotations update - buyOrder veya chartData değiştiğinde
+  // Annotations update
   useEffect(() => {
-    if (!buyOrder || rawBinanceData.length === 0) {
+    if (!buyOrder || !buyOrder.buy_time || rawBinanceData.length === 0) {
       setAnnotations({})
-      setCurrentProfit(null)
       return
     }
 
-    console.log('🔍 Buy order received:', buyOrder)
-    console.log('🔍 Raw data length:', rawBinanceData.length)
+    const buyDate = new Date(buyOrder.buy_time)
+    if (isNaN(buyDate.getTime())) {
+      setAnnotations({})
+      return
+    }
 
-    const buyTime = new Date(buyOrder.buy_time).getTime()
-    console.log('🔍 Buy time timestamp:', buyTime, '->', new Date(buyTime).toISOString())
+    const buyTime = buyDate.getTime()
 
-    // Buy time'a en yakın mum'u bul
     const nearestCandle = rawBinanceData.reduce((prev, curr) => {
       return (Math.abs(curr[0] - buyTime) < Math.abs(prev[0] - buyTime)) ? curr : prev
     })
 
-    console.log('🔍 Nearest candle:', nearestCandle)
-
-    // Üçgen mumun ÜSTÜNDE olsun (high price)
     const markerPrice = parseFloat(nearestCandle[2])
 
     setAnnotations({
@@ -87,15 +83,7 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
         }
       }]
     })
-
-    // Current Profit hesapla
-    const lastCandle = rawBinanceData[rawBinanceData.length - 1]
-    const currentPrice = parseFloat(lastCandle[4])
-    const profit = ((currentPrice - buyOrder.buy_price) / buyOrder.buy_price) * 100
-    setCurrentProfit(profit)
-
-    console.log('✅ Annotations set. Current profit:', profit.toFixed(2) + '%')
-  }, [buyOrder, rawBinanceData]) // ✅ Her ikisini de izle
+  }, [buyOrder, rawBinanceData])
 
   const fetchChartData = async () => {
     setIsLoading(true)
@@ -114,8 +102,6 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
       }
       
       const data = await response.json()
-      
-      // ✅ Raw data'yı sakla (annotations için)
       setRawBinanceData(data)
       
       const formattedData = data.map(candle => ({
@@ -130,7 +116,6 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
       
       setChartData(formattedData)
       
-      // Coin bilgisi
       if (data.length > 0) {
         const lastCandle = data[data.length - 1]
         const currentPrice = parseFloat(lastCandle[4])
@@ -236,18 +221,14 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
     data: chartData
   }]
 
-  const profitColor = currentProfit !== null
-    ? currentProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'
-    : 'text-slate-400'
-
   return (
-    <div className="bg-slate-900/40 px-3 py-3 backdrop-blur-sm sm:px-4">
+    <div className="bg-slate-900/40 px-4 py-3 backdrop-blur-sm h-full">
       
-      {/* ÜST BİLGİ */}
-      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      {/* ✅ ÜST BİLGİ */}
+      <div className="mb-3 flex items-center justify-between">
         
-        {/* Sol: Sembol + Price + 24h */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        {/* Sol: Sembol + Symbol + Price + 24h + Order Ref */}
+        <div className="flex items-center gap-3 flex-wrap">
           <img 
             src={COIN_MAP[activeCoin]?.icon} 
             alt={coinInfo?.symbol || 'coin'}
@@ -258,8 +239,8 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
           </span>
           
           {coinInfo && (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-base font-bold font-mono text-white sm:text-lg">
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-bold font-mono text-white">
                 ${coinInfo.currentPrice.toLocaleString(undefined, { 
                   minimumFractionDigits: 2, 
                   maximumFractionDigits: 2 
@@ -272,20 +253,19 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
               </span>
             </div>
           )}
+
+          {/* ✅ Order Ref (yeni eklenen) */}
+          {buyOrder && buyOrder.order_ref && (
+            <span className="rounded-md border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-mono font-medium text-cyan-300">
+              {buyOrder.order_ref}
+            </span>
+          )}
         </div>
         
-        {/* Sağ: Current Profit */}
-        <div className="flex items-center justify-between gap-2 rounded-lg bg-slate-950/50 px-2 py-1 sm:justify-end">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
-            Current Profit
-          </span>
-          <span className={`text-sm font-bold font-mono ${profitColor}`}>
-            {currentProfit !== null 
-              ? `${currentProfit >= 0 ? '+' : ''}${currentProfit.toFixed(2)}%`
-              : '—'
-            }
-          </span>
-        </div>
+        {/* ✅ Sağ: "Last 3 Days • 15m Candles" (Current Profit yerine) */}
+        <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">
+          Last 3 Days • 15m Candles
+        </span>
       </div>
 
       {/* Grafik */}
@@ -319,13 +299,6 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
           />
         </div>
       )}
-      
-      {/* Zaman bilgisi */}
-      <div className="mt-2 text-center">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
-          Last 3 Days • 15m Candles
-        </span>
-      </div>
     </div>
   )
 }
