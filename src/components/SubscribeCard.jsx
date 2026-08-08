@@ -73,11 +73,6 @@ function SubscribeCard() {
           </button>
         </div>
       </form>
-
-      {/* Alt bilgi */}
-      <p className="mt-3 text-center text-[10px] text-slate-500">
-        No spam. Unsubscribe at any time.
-      </p>
     </div>
   )
 }

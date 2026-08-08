@@ -8,6 +8,7 @@ import CryptoNews from './components/CryptoNews'
 import TradeList from './components/TradeList'
 import PositionCard from './components/PositionCard'
 import BrokerCashChart from './components/BrokerCashChart'
+import icon from './assets/icon.png'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -53,12 +54,6 @@ function Dashboard() {
       if (!response.ok) throw new Error('Failed to fetch position')
       return response.json()
     },
-    refetchInterval: 15000,
-    staleTime: 10000,
-    gcTime: 10 * 60 * 1000,
-    retry: 3,
-    retryDelay: 2000,
-    placeholderData: (previousData) => previousData,
   })
 
   const isLoading = isLoadingTrades || isLoadingPosition
@@ -80,16 +75,8 @@ function Dashboard() {
           <CoinSelector activeCoin={activeCoin} onSelectCoin={setActiveCoin} />
         </div>
         
-        <div className="flex-1 flex justify-end">
-          <div className="flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1.5 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
-            </span>
-            <span className="text-sm font-semibold uppercase tracking-wider text-red-300">
-              Live
-            </span>
-          </div>
+        <div className="ml-3 flex items-center justify-center">
+          <img src={icon} alt="Logo" className="h-6 w-6" />
         </div>
       </div>
 
@@ -131,7 +118,10 @@ function Dashboard() {
               />
             </div>
             <div className="md:col-span-2">
-              <PositionCard position={activePosition} />
+                <PositionCard 
+                  position={activePosition} 
+                  activeCoin={activeCoin} 
+                />
             </div>
           </div>
 
@@ -141,10 +131,11 @@ function Dashboard() {
           {/* TradeList + BrokerCash */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             <div className="lg:col-span-3">
-              <TradeList trades={trades || []} />
+              <BrokerCashChart trades={trades || []} />
+              
             </div>
             <div className="lg:col-span-2">
-              <BrokerCashChart trades={trades || []} />
+              <TradeList trades={trades || []} />
             </div>
           </div>
 

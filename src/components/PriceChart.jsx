@@ -253,18 +253,11 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
               </span>
             </div>
           )}
-
-          {/* ✅ Order Ref (yeni eklenen) */}
-          {buyOrder && buyOrder.order_ref && (
-            <span className="rounded-md border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-mono font-medium text-cyan-300">
-              {buyOrder.order_ref}
-            </span>
-          )}
         </div>
         
         {/* ✅ Sağ: "Last 3 Days • 15m Candles" (Current Profit yerine) */}
         <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">
-          Last 3 Days • 15m Candles
+          15m Candles
         </span>
       </div>
 

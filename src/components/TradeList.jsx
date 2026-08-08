@@ -99,7 +99,15 @@ function TradeRow({ trade, index }) {
         <div className="flex flex-col justify-center border-b border-white/10 pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-3">
           <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-slate-400">Profit</p>
           <p className={`text-lg font-bold font-mono ${profitClass} drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]`}>
-            {profit > 0 ? '+' : '-'}{formatValue(profit)}{"%"}
+            {formatValue(profitDisplay)}
+          </p>
+        </div>
+
+        {/* DURATION */}
+        <div className="flex flex-col justify-center border-b border-white/10 pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-3">
+          <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-slate-400">Duration</p>
+          <p className="text-base font-bold font-mono text-cyan-100">
+            {formatDuration(trade.duration)}
           </p>
         </div>
 
@@ -116,7 +124,7 @@ function TradeRow({ trade, index }) {
         </div>
 
         {/* TIMES */}
-        <div className="flex flex-col justify-center border-b border-white/10 pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-3">
+        <div className="flex flex-col justify-center">
           <div className="mb-1">
             <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Sell Time</p>
             <p className="text-sm font-semibold font-mono text-cyan-200">{formatValue(trade.sell_time)}</p>
@@ -127,13 +135,6 @@ function TradeRow({ trade, index }) {
           </div>
         </div>
 
-        {/* DURATION */}
-        <div className="flex flex-col justify-center">
-          <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-slate-400">Duration</p>
-          <p className="text-base font-bold font-mono text-cyan-100">
-            {formatDuration(trade.duration)}
-          </p>
-        </div>
 
       </div>
     </motion.div>
