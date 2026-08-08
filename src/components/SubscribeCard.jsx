@@ -23,7 +23,7 @@ function SubscribeCard() {
   }
 
   return (
-    <div className="mt-6 rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-cyan-950/40 p-4 backdrop-blur-sm sm:p-6">
+    <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-cyan-950/40 p-4 backdrop-blur-sm sm:p-6">
 
       {/* Başlık */}
       <div className="mb-2 text-center">

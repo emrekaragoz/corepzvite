@@ -64,7 +64,7 @@ function Dashboard() {
     <div className="w-full rounded-2xl border border-cyan-400/20 bg-slate-950/80 p-2 shadow-[0_0_24px_rgba(34,211,238,0.12)] backdrop-blur-xl sm:p-3">
       
       
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 relative flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-start">
         
         {/* Üst (mobil) / Sol (desktop): Icon + Trade Dashboard */}
         <div className="flex min-w-0 items-center gap-2">
@@ -78,8 +78,8 @@ function Dashboard() {
           </p>
         </div>
         
-        {/* Alt (mobil) / Sağ (desktop): CoinSelector */}
-        <div className="flex w-full items-center justify-end sm:w-auto">
+        {/* Alt (mobil) / Ortada: CoinSelector */}
+        <div className="flex w-full items-center justify-center sm:absolute sm:left-1/2 sm:top-1/2 sm:w-auto sm:-translate-x-1/2 sm:-translate-y-1/2">
           <CoinSelector activeCoin={activeCoin} onSelectCoin={setActiveCoin} />
         </div>
       </div>
@@ -114,17 +114,17 @@ function Dashboard() {
           {/* 1. PRICECHART + ACTIVE POSITION (MEVCUT)    */}
           {/* ═══════════════════════════════════════════ */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div className="md:col-span-3">
-              <PriceChart 
-                activeCoin={activeCoin} 
-                buyOrder={hasPosition ? activePosition : null} 
-              />
-            </div>
             <div className="md:col-span-2">
                 <PositionCard 
                   position={activePosition} 
                   activeCoin={activeCoin} 
                 />
+            </div>
+            <div className="md:col-span-3">
+              <PriceChart 
+                activeCoin={activeCoin} 
+                buyOrder={hasPosition ? activePosition : null} 
+              />
             </div>
           </div>
 
@@ -133,19 +133,15 @@ function Dashboard() {
           {/* ═══════════════════════════════════════════ */}
           {/* TradeList + BrokerCash */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-            <div className="lg:col-span-3">
-              <BrokerCashChart trades={trades || []} />
-              
-            </div>
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 flex flex-col gap-4">
               <TradeList trades={trades || []} />
             </div>
+            <div className="lg:col-span-3 flex flex-col gap-4">
+              <BrokerCashChart trades={trades || []} />
+              <SubscribeCard />
+            </div>
           </div>
-
-          {/* ═══════════════════════════════════════════ */}
-          {/* 4. SUBSCRIBE + NEWS (AYNI)                  */}
-          {/* ═══════════════════════════════════════════ */}
-          <SubscribeCard />
+          
           <CryptoNews />
         </div>
       )}

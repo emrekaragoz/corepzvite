@@ -27,7 +27,7 @@ const formatDuration = (durationStr) => {
 
 function TradeList({ trades }) {
   // ✅ En yeni 5 trade'i göster
-  const MAX_VISIBLE_TRADES = 5
+  const MAX_VISIBLE_TRADES = 4
   
   // En yeni trade'i en üste almak için sell_time'a göre sırala
   const sortedTrades = [...(trades || [])]
@@ -47,9 +47,9 @@ function TradeList({ trades }) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 rounded-3xl border border-cyan-500/10 bg-slate-950/70 p-2">
       {/* ✅ Toplam trade sayısı bilgisini göster */}
-      <div className="flex flex-col items-center justify-center gap-1 text-[11px] leading-snug">
+      <div className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-white/10 bg-slate-900/70 p-2 text-[11px] leading-snug">
         <h2 className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-200">
           - Position History -
         </h2>
@@ -91,46 +91,46 @@ function TradeRow({ trade, index }) {
       transition={{ duration: 0.35, ease: 'easeOut', delay: index * 0.05 }}
       className="group relative overflow-hidden rounded-2xl border border-cyan-400/20 bg-slate-900/60 p-3 shadow-[0_0_16px_rgba(34,211,238,0.08)] backdrop-blur-xl transition-all duration-300 hover:border-cyan-400/40 hover:shadow-[0_0_24px_rgba(34,211,238,0.12)] sm:p-3"
     >
-      <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.1),transparent_50%)]" />
+      <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.12),transparent_50%)]" />
       
-      <div className="relative z-10 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4 md:gap-3">
+      <div className="relative z-10 grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
         
         {/* PROFIT */}
-        <div className="flex flex-col justify-center border-b border-white/10 pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-3">
-          <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-slate-400">Profit</p>
-          <p className={`text-lg font-bold font-mono ${profitClass} drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]`}>
+        <div className="flex flex-col justify-center rounded-2xl bg-slate-900/80 p-2">
+          <p className="mb-1 text-[9px] uppercase tracking-[0.18em] text-slate-400">Profit</p>
+          <p className={`text-base font-bold font-mono ${profitClass} drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]`}>
             {formatValue(profitDisplay)}
           </p>
         </div>
 
         {/* DURATION */}
-        <div className="flex flex-col justify-center border-b border-white/10 pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-3">
-          <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-slate-400">Duration</p>
-          <p className="text-base font-bold font-mono text-cyan-100">
+        <div className="flex flex-col justify-center rounded-2xl bg-slate-900/80 p-2">
+          <p className="mb-1 text-[9px] uppercase tracking-[0.18em] text-slate-400">Duration</p>
+          <p className="text-sm font-bold font-mono text-cyan-100 leading-tight">
             {formatDuration(trade.duration)}
           </p>
         </div>
 
         {/* PRICES */}
-        <div className="flex flex-col justify-center border-b border-white/10 pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-3">
+        <div className="flex flex-col justify-center rounded-2xl bg-slate-900/80 p-2">
           <div className="mb-1">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Sell Price</p>
+            <p className="text-[9px] uppercase tracking-[0.18em] text-slate-500">Sell Price</p>
             <p className="text-sm font-semibold font-mono text-cyan-200">{formatValue(trade.sell_price)}</p>
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Buy Price</p>
+            <p className="text-[9px] uppercase tracking-[0.18em] text-slate-500">Buy Price</p>
             <p className="text-sm font-semibold font-mono text-cyan-200">{formatValue(trade.buy_price)}</p>
           </div>
         </div>
 
         {/* TIMES */}
-        <div className="flex flex-col justify-center">
+        <div className="flex flex-col justify-center rounded-2xl bg-slate-900/80 p-2">
           <div className="mb-1">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Sell Time</p>
+            <p className="text-[9px] uppercase tracking-[0.18em] text-slate-500">Sell Time</p>
             <p className="text-sm font-semibold font-mono text-cyan-200">{formatDateDisplay(trade.sell_time)}</p>
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Buy Time</p>
+            <p className="text-[9px] uppercase tracking-[0.18em] text-slate-500">Buy Time</p>
             <p className="text-sm font-semibold font-mono text-cyan-200">{formatDateDisplay(trade.buy_time)}</p>
           </div>
         </div>
