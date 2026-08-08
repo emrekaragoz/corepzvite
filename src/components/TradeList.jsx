@@ -1,5 +1,6 @@
 import React from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { formatDateDisplay } from '../utils/date'
 
 // ✅ Duration string'ini "18hours 15mins" formatına çevirir
 const formatDuration = (durationStr) => {
@@ -46,19 +47,18 @@ function TradeList({ trades }) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       {/* ✅ Toplam trade sayısı bilgisini göster */}
-        <div className="flex flex-col items-center justify-center gap-1 text-sm leading-relaxed">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-200">
-            - Position History -
-            </h2>
-        </div>
-      
-        <AnimatePresence mode="popLayout">
-            {sortedTrades.map((trade, index) => (
-            <TradeRow key={trade.id || index} trade={trade} index={index} />
-            ))}
-        </AnimatePresence>
+      <div className="flex flex-col items-center justify-center gap-1 text-[11px] leading-snug">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-200">
+          - Position History -
+        </h2>
+      </div>
+      <AnimatePresence mode="popLayout">
+        {sortedTrades.map((trade, index) => (
+          <TradeRow key={trade.id || index} trade={trade} index={index} />
+        ))}
+      </AnimatePresence>
     </div>
   )
 }
@@ -89,11 +89,11 @@ function TradeRow({ trade, index }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: 'easeOut', delay: index * 0.05 }}
-      className="group relative overflow-hidden rounded-2xl border border-cyan-400/20 bg-slate-900/60 p-3 shadow-[0_0_20px_rgba(34,211,238,0.08)] backdrop-blur-xl transition-all duration-300 hover:border-cyan-400/40 hover:shadow-[0_0_30px_rgba(34,211,238,0.15)] sm:p-4"
+      className="group relative overflow-hidden rounded-2xl border border-cyan-400/20 bg-slate-900/60 p-3 shadow-[0_0_16px_rgba(34,211,238,0.08)] backdrop-blur-xl transition-all duration-300 hover:border-cyan-400/40 hover:shadow-[0_0_24px_rgba(34,211,238,0.12)] sm:p-3"
     >
       <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.1),transparent_50%)]" />
       
-      <div className="relative z-10 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4 md:gap-4">
+      <div className="relative z-10 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4 md:gap-3">
         
         {/* PROFIT */}
         <div className="flex flex-col justify-center border-b border-white/10 pb-3 sm:border-b-0 sm:border-r sm:pb-0 sm:pr-3">
@@ -127,11 +127,11 @@ function TradeRow({ trade, index }) {
         <div className="flex flex-col justify-center">
           <div className="mb-1">
             <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Sell Time</p>
-            <p className="text-sm font-semibold font-mono text-cyan-200">{formatValue(trade.sell_time)}</p>
+            <p className="text-sm font-semibold font-mono text-cyan-200">{formatDateDisplay(trade.sell_time)}</p>
           </div>
           <div>
             <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Buy Time</p>
-            <p className="text-sm font-semibold font-mono text-cyan-200">{formatValue(trade.buy_time)}</p>
+            <p className="text-sm font-semibold font-mono text-cyan-200">{formatDateDisplay(trade.buy_time)}</p>
           </div>
         </div>
 

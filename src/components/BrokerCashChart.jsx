@@ -5,9 +5,6 @@ const INITIAL_CASH = 1000
 const LEVERAGE = 10
 
 function BrokerCashChart({ trades }) {
-  // ═══════════════════════════════════════════
-  // BROKER CASH HESAPLAMA (LEVERAGE İLE)
-  // ═══════════════════════════════════════════
   const { chartData, currentValue, totalProfit, profitPercent } = useMemo(() => {
     if (!trades || trades.length === 0) {
       return {
@@ -37,12 +34,7 @@ function BrokerCashChart({ trades }) {
     const totalProfit = current - INITIAL_CASH
     const profitPercent = (totalProfit / INITIAL_CASH) * 100
 
-    return {
-      chartData: data,
-      currentValue: current,
-      totalProfit,
-      profitPercent
-    }
+    return { chartData: data, currentValue: current, totalProfit, profitPercent }
   }, [trades])
 
   const isProfit = totalProfit >= 0
@@ -51,10 +43,15 @@ function BrokerCashChart({ trades }) {
   const options = {
     chart: {
       type: 'area',
-      height: 250,
+      height: '100%',
       background: 'transparent',
       toolbar: { show: false },
       zoom: { enabled: false },
+      animations: {
+        enabled: true,
+        easing: 'easeinout',
+        speed: 600,
+      },
     },
     theme: { mode: 'dark' },
     colors: [accentColor],
@@ -62,14 +59,14 @@ function BrokerCashChart({ trades }) {
       type: 'gradient',
       gradient: {
         shadeIntensity: 1,
-        opacityFrom: 0.35,
+        opacityFrom: 0.4,
         opacityTo: 0.02,
         stops: [0, 100]
       }
     },
     stroke: {
       curve: 'smooth',
-      width: 2,
+      width: 2.5,
     },
     dataLabels: {
       enabled: true,
@@ -79,19 +76,17 @@ function BrokerCashChart({ trades }) {
         fontSize: '9px',
         fontWeight: 500,
       },
-      background: {
-        enabled: false,
-      },
-      offsetY: -8,
+      background: { enabled: false },
+      offsetY: -10,
     },
     grid: {
       borderColor: '#1e293b',
       strokeDashArray: 3,
       padding: {
-        left: 0,
-        right: 10,
-        top: -15,
-        bottom: 10  // ✅ X-axis etiketleri için alt padding artırıldı
+        left: 10,
+        right: 15,
+        top: 20,
+        bottom: 5
       }
     },
     xaxis: {
@@ -103,7 +98,7 @@ function BrokerCashChart({ trades }) {
           hour: 'HH:mm',
         },
         hideOverlappingLabels: true,
-        offsetY: 8,  // ✅ Etiketleri biraz aşağı it (görünür olsun)
+        offsetY: 8,
       },
       axisBorder: { show: false },
       axisTicks: { show: false },
@@ -117,9 +112,7 @@ function BrokerCashChart({ trades }) {
     tooltip: {
       theme: 'dark',
       x: { format: 'dd MMM HH:mm' },
-      y: { 
-        formatter: (value) => '$' + Math.round(value),
-      },
+      y: { formatter: (value) => '$' + Math.round(value) },
     },
     annotations: {
       yaxis: [{
@@ -139,31 +132,37 @@ function BrokerCashChart({ trades }) {
     }
   }
 
-  const series = [{
-    name: 'Portfolio',
-    data: chartData
-  }]
+  const series = [{ name: 'Portfolio', data: chartData }]
 
   return (
-    <div className="rounded-2xl border border-cyan-500/20 bg-slate-900/40 p-3 backdrop-blur-sm flex flex-col h-full">
+    <div className="relative rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/60 to-slate-950/40 p-4 backdrop-blur-sm flex flex-col overflow-hidden">
       
-      {/* ✅ ÜST: Başlık (sol) + Miktar + Yüzde (sağ, aynı boyut) */}
-      <div className="mb-3 flex items-center justify-between">
+      {/* Dekoratif glow efekti */}
+      <div 
+        className="pointer-events-none absolute -top-20 -right-20 h-40 w-40 rounded-full blur-3xl opacity-20"
+        style={{ backgroundColor: accentColor }}
+      />
+
+      {/* ÜST: Başlık (sol) + Miktar + Yüzde (sağ) */}
+      <div className="relative mb-3 flex items-center justify-between">
         
-        {/* Sol: Broker Cash */}
+        {/* Sol: Broker Cash + Leverage */}
         <div className="flex items-center gap-2.5">
-          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: accentColor }}></span>
+          <span 
+            className="h-2 w-2 rounded-full shadow-lg" 
+            style={{ backgroundColor: accentColor, boxShadow: `0 0 8px ${accentColor}` }}
+          />
           <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300 whitespace-nowrap">
             Broker Cash
           </h3>
         </div>
 
-        {/* Sağ: Miktar + Profit Yüzdesi (AYNI BOYUT) */}
+        {/* Sağ: Miktar + Yüzde (aynı boyut) */}
         <div className="flex items-center gap-2">
           <p className="text-lg font-bold font-mono text-white leading-none whitespace-nowrap">
             ${Math.round(currentValue)}
           </p>
-          <p className={`text-lg font-bold font-mono leading-none whitespace-nowrap ${
+          <p className={`text-md font-bold font-mono leading-none whitespace-nowrap ${
             isProfit ? 'text-emerald-400' : 'text-rose-400'
           }`}>
             ({isProfit ? '+' : ''}{profitPercent.toFixed(1)}%)
@@ -172,24 +171,21 @@ function BrokerCashChart({ trades }) {
       </div>
 
       {/* GRAFİK */}
-      <div className="h-[250px]">
+      <div className="relative h-[280px] w-full">
         {chartData.length > 1 ? (
           <Chart 
             options={options} 
             series={series} 
             type="area" 
-            height={250}
+            height="100%"
           />
         ) : (
-          <div className="flex h-[250px] items-center justify-center">
-            <p className="text-xs text-slate-500">
-              Waiting for trades...
-            </p>
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-400/20 border-t-cyan-300" />
+            <p className="text-xs text-slate-500">Waiting for trades...</p>
           </div>
         )}
       </div>
-
-      {/* ✅ Summary Card KALDIRILDI */}
     </div>
   )
 }

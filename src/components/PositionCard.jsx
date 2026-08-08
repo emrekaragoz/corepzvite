@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { formatDateDisplay } from '../utils/date'
 
 // Binance sembol mapping
 const COIN_SYMBOLS = {
@@ -71,44 +72,103 @@ function PositionCard({ position, activeCoin = 'BTC' }) {
   // ============================================
   // BOŞ DURUM
   // ============================================
-  if (!hasData) {
-    return (
-      <div className="rounded-2xl border border-dashed border-slate-600/40 bg-slate-900/30 p-4 backdrop-blur-sm h-full flex flex-col items-center justify-center min-h-[280px]">
+  // BOŞ DURUM - Strateji canlı çalışıyor
+if (!hasData) {
+  return (
+    <div className="relative rounded-2xl border border-cyan-500/10 bg-gradient-to-br from-slate-900/90 to-slate-950/90 p-6 backdrop-blur-xl h-full flex flex-col items-center justify-center overflow-hidden min-h-[220px] shadow-[inset_0_0_80px_rgba(0,0,0,0.6)]">
+      
+      {/* CSS Animasyonları */}
+      <style>{`
+        @keyframes breathe {
+          0%, 100% { transform: scale(1); opacity: 0.15; }
+          50% { transform: scale(1.4); opacity: 0.35; }
+        }
+        @keyframes textShimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        @keyframes spinSlow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes spinReverse {
+          from { transform: rotate(360deg); }
+          to { transform: rotate(0deg); }
+        }
+        @keyframes scanHorizontal {
+          0% { left: -10%; opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { left: 110%; opacity: 0; }
+        }
+        @keyframes coreGlow {
+          0%, 100% { box-shadow: 0 0 15px rgba(34, 211, 238, 0.2); }
+          50% { box-shadow: 0 0 40px rgba(34, 211, 238, 0.6), 0 0 80px rgba(34, 211, 238, 0.15); }
+        }
+        .animate-breathe { animation: breathe 5s ease-in-out infinite; }
+        .animate-text-shimmer {
+          background-size: 200% auto;
+          animation: textShimmer 5s linear infinite;
+        }
+        .animate-spin-slow { animation: spinSlow 10s linear infinite; }
+        .animate-spin-reverse { animation: spinReverse 7s linear infinite; }
+        .animate-scan-horizontal {
+          animation: scanHorizontal 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        .animate-core-glow { animation: coreGlow 3s ease-in-out infinite; }
+      `}</style>
+
+      {/* Arka Plan Işık Küresi */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl animate-breathe" />
+      
+      {/* İnce Grid Deseni */}
+      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #ffffff 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+
+      {/* === FRAME'İ SOLDAN SAĞA TARAYAN BÜYÜK IŞIK EFEXTİ === */}
+      <div className="absolute top-0 h-full w-full pointer-events-none">
+        <div className="absolute top-0 h-full w-[1px] bg-gradient-to-b from-transparent via-cyan-300 to-transparent shadow-[0_0_20px_#22d3ee] animate-scan-horizontal" />
+        <div className="absolute top-0 h-full w-[100px] bg-gradient-to-r from-transparent via-cyan-400/10 to-transparent blur-2xl animate-scan-horizontal" style={{ animationDelay: '0.1s' }} />
+      </div>
+      
+        {/* === ORTA GÖRSEL (Dönen Halkalar + Hedef İkon) === */}
+      <div className="relative mb-5 flex h-20 w-20 items-center justify-center">
         
-        {/* İkon */}
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-slate-600/30 bg-slate-800/40">
-          <svg 
-            className="h-7 w-7 text-slate-500" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={1.5} 
-              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" 
-            />
-          </svg>
-        </div>
+        {/* Dıştaki yavaş dönen çember */}
+        <div className="absolute h-full w-full rounded-full border border-cyan-400/20 animate-spin-slow" />
+        
+        {/* Ortadaki ters yönde dönen çember */}
+        <div className="absolute h-[85%] w-[85%] rounded-full border border-cyan-400/30 animate-spin-reverse" />
+        
+        {/* İçteki nabız atan halka (Ping efekti) */}
+        <div className="absolute h-[70%] w-[70%] rounded-full border border-emerald-400/20 animate-ping" style={{ animationDuration: '1.8s' }} />
 
-        {/* No Position mesajı */}
-        <h3 className="text-sm font-bold uppercase tracking-[0.25em] text-slate-300 mb-2">
-          No Position
-        </h3>
-        <p className="text-xs text-slate-500 text-center leading-relaxed max-w-[220px]">
-          Waiting for the next trading signal to open a position
-        </p>
-
-        {/* Animasyonlu bekleme */}
-        <div className="mt-4 flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-slate-600 animate-pulse" style={{ animationDelay: '0ms' }}></span>
-          <span className="h-1.5 w-1.5 rounded-full bg-slate-600 animate-pulse" style={{ animationDelay: '200ms' }}></span>
-          <span className="h-1.5 w-1.5 rounded-full bg-slate-600 animate-pulse" style={{ animationDelay: '400ms' }}></span>
+        {/* Merkezdeki Glow Butonu (Fiyat hedefini simgeler) */}
+        <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-cyan-500 to-emerald-500 shadow-[0_0_35px_rgba(34,211,238,0.6)]">
         </div>
       </div>
-    )
-  }
+
+      {/* === METİN ALANI === */}
+      <div className="relative z-10 text-center space-y-1.5 max-w-[240px]">
+        <h3 className="text-[11px] font-bold tracking-[0.12em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-white to-cyan-200 animate-text-shimmer leading-relaxed">
+          Scanning the best entry point
+        </h3>
+        <p className="text-[11px] font-light tracking-wider text-slate-400/70">
+          No current position yet.
+        </p>
+      </div>
+
+      {/* === SAĞ ÜST KÖŞE "LIVE" ETİKETİ === */}
+      <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 border border-emerald-500/20 backdrop-blur-sm z-20">
+        <span className="relative flex h-1.5 w-1.5">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+        </span>
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-emerald-300">Live</span>
+      </div>
+
+    </div>
+  );
+}
 
   // ============================================
   // POZİSYON VAR
@@ -145,7 +205,7 @@ function PositionCard({ position, activeCoin = 'BTC' }) {
         <div className="rounded-xl border border-white/10 bg-white/5 p-2.5">
           <p className="text-[10px] uppercase tracking-[0.15em] text-slate-500">Buy Time</p>
           <p className="text-sm font-semibold font-mono text-cyan-200 mt-0.5">
-            {position.buy_time || '—'}
+            {formatDateDisplay(position.buy_time)}
           </p>
         </div>
         

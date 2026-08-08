@@ -225,41 +225,36 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
     <div className="bg-slate-900/40 px-4 py-3 backdrop-blur-sm h-full">
       
       {/* ✅ ÜST BİLGİ */}
-      <div className="mb-3 flex items-center justify-between">
-        
-        {/* Sol: Sembol + Symbol + Price + 24h + Order Ref */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <img 
-            src={COIN_MAP[activeCoin]?.icon} 
-            alt={coinInfo?.symbol || 'coin'}
-            className="h-6 w-6 rounded-full object-cover"
-          />
-          <span className="text-sm font-semibold text-white">
-            {coinInfo?.symbol || '...'}/USDT
-          </span>
-          
-          {coinInfo && (
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold font-mono text-white">
-                ${coinInfo.currentPrice.toLocaleString(undefined, { 
-                  minimumFractionDigits: 2, 
-                  maximumFractionDigits: 2 
-                })}
-              </span>
-              <span className={`text-xs font-semibold ${
-                coinInfo.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'
-              }`}>
-                {coinInfo.change24h >= 0 ? '+' : ''}{coinInfo.change24h.toFixed(2)}%
-              </span>
-            </div>
-          )}
-        </div>
-        
-        {/* ✅ Sağ: "Last 3 Days • 15m Candles" (Current Profit yerine) */}
-        <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">
-          15m Candles
-        </span>
-      </div>
+      {/* ✅ ÜST BİLGİ */}
+<div className="mb-3 flex items-center justify-between">
+  
+  {/* Sol: Icon + Symbol + 15m Candles */}
+  <div className="flex items-center gap-3 flex-wrap">
+    <img 
+      src={COIN_MAP[activeCoin]?.icon} 
+      alt={coinInfo?.symbol || 'coin'}
+      className="h-6 w-6 rounded-full object-cover"
+    />
+    <span className="text-sm font-semibold text-white whitespace-nowrap">
+      {coinInfo?.symbol || '...'}/USDT
+    </span>
+    <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">
+      15m Candles
+    </span>
+  </div>
+  
+  {/* Sağ: Price + 24h Change */}
+  {coinInfo && (
+    <div className="flex items-center gap-2">
+      <span className="text-lg font-bold font-mono text-white whitespace-nowrap">
+        ${coinInfo.currentPrice.toLocaleString(undefined, { 
+          minimumFractionDigits: 2, 
+          maximumFractionDigits: 2 
+        })}
+      </span>
+    </div>
+  )}
+</div>
 
       {/* Grafik */}
       {isLoading ? (

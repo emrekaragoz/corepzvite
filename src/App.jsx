@@ -18,7 +18,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <main className="flex min-h-screen flex-col bg-[#0a0a0f] text-slate-100">
-        <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
+        <div className="w-full flex flex-1 flex-col px-2 py-2 sm:px-4 sm:py-3 max-w-full">
           <Dashboard />
         </div>
         <Footer />
@@ -61,25 +61,25 @@ function Dashboard() {
   const hasPosition = activePosition && activePosition.buy_time
 
   return (
-    <div className="w-full rounded-3xl border border-cyan-400/20 bg-slate-950/80 p-3 shadow-[0_0_40px_rgba(34,211,238,0.15)] backdrop-blur-xl sm:p-5">
+    <div className="w-full rounded-2xl border border-cyan-400/20 bg-slate-950/80 p-2 shadow-[0_0_24px_rgba(34,211,238,0.12)] backdrop-blur-xl sm:p-3">
       
       
-      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         
         {/* Üst (mobil) / Sol (desktop): Icon + Trade Dashboard */}
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2">
           <img 
             src={icon} 
             alt="Logo" 
-            className="h-12 w-12 drop-shadow-[0_0_12px_rgba(34,211,238,0.6)]" 
+            className="h-10 w-10" 
           />
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300/90 whitespace-nowrap">
+          <p className="min-w-0 text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300/90 truncate">
             Trade Dashboard
           </p>
         </div>
         
         {/* Alt (mobil) / Sağ (desktop): CoinSelector */}
-        <div className="flex-none">
+        <div className="flex w-full items-center justify-end sm:w-auto">
           <CoinSelector activeCoin={activeCoin} onSelectCoin={setActiveCoin} />
         </div>
       </div>
