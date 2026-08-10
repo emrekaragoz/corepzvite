@@ -1,8 +1,32 @@
 import React, { useState, useEffect } from 'react'
 import Chart from 'react-apexcharts'
-import { COIN_MAP } from '../utils/coins'
-import { formatCurrency, formatPercent } from '../utils/date'
-import { fetchJson } from '../utils/api'
+
+const COIN_MAP = {
+  BTC: { 
+    name: 'Bitcoin', 
+    symbol: 'BTC', 
+    binanceSymbol: 'BTCUSDT',
+    icon: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/btc.png'
+  },
+  XRP: { 
+    name: 'Ripple', 
+    symbol: 'XRP', 
+    binanceSymbol: 'XRPUSDT',
+    icon: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/xrp.png'
+  },
+  BNB: { 
+    name: 'BNB', 
+    symbol: 'BNB', 
+    binanceSymbol: 'BNBUSDT',
+    icon: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/bnb.png'
+  },
+  TRX: { 
+    name: 'TRON', 
+    symbol: 'TRX', 
+    binanceSymbol: 'TRXUSDT',
+    icon: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/trx.png'
+  }
+}
 
 function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
   const [chartData, setChartData] = useState([])
@@ -12,10 +36,12 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
   const [error, setError] = useState(null)
   const [annotations, setAnnotations] = useState({})
 
+  // Data fetch
   useEffect(() => {
     fetchChartData()
   }, [activeCoin])
 
+  // Annotations update
   useEffect(() => {
     if (!buyOrder || !buyOrder.buy_time || rawBinanceData.length === 0) {
       setAnnotations({})
@@ -33,6 +59,8 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
     const nearestCandle = rawBinanceData.reduce((prev, curr) => {
       return (Math.abs(curr[0] - buyTime) < Math.abs(prev[0] - buyTime)) ? curr : prev
     })
+
+    const markerPrice = parseFloat(nearestCandle[2])
 
     setAnnotations({
       xaxis: [{
@@ -65,9 +93,15 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
       const coin = COIN_MAP[activeCoin]
       if (!coin) throw new Error('Invalid coin')
       
-      const data = await fetchJson(
+      const response = await fetch(
         `https://api.binance.com/api/v3/klines?symbol=${coin.binanceSymbol}&interval=15m&limit=288`
       )
+      
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`)
+      }
+      
+      const data = await response.json()
       setRawBinanceData(data)
       
       const formattedData = data.map(candle => ({
@@ -148,14 +182,36 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
       }
     },
     tooltip: {
-      theme: 'dark',
-      x: { format: 'dd MMM HH:mm' },
-      y: {
-        formatter: (value) => formatCurrency(value, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }),
-      },
+      custom: function({ series, seriesIndex, dataPointIndex, w }) {
+        const data = w.globals.initialSeries[seriesIndex].data[dataPointIndex]
+        const date = new Date(data.x).toLocaleString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        })
+        const close = data.y[3]
+        
+        return `
+          <div style="
+            background: rgba(15, 23, 42, 0.95); 
+            border: 1px solid rgba(34, 211, 238, 0.3); 
+            border-radius: 8px; 
+            padding: 8px 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+          ">
+            <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">
+              ${date}
+            </div>
+            <div style="font-size: 14px; font-weight: bold; color: #22d3ee;">
+              $${close.toLocaleString(undefined, { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2 
+              })}
+            </div>
+          </div>
+        `
+      }
     },
     annotations: annotations,
   }
@@ -167,33 +223,40 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
 
   return (
     <div className="bg-slate-900/40 px-4 py-3 backdrop-blur-sm h-full">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-3 flex-wrap">
-          <img
-            src={COIN_MAP[activeCoin]?.icon}
-            alt={coinInfo?.symbol || 'coin'}
-            className="h-6 w-6 rounded-full object-cover"
-          />
-          <span className="text-sm font-semibold text-white whitespace-nowrap">
-            {coinInfo?.symbol || '...'}/USDT
-          </span>
-          <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">
-            15m Candles
-          </span>
-        </div>
+      
+      {/* ✅ ÜST BİLGİ */}
+      {/* ✅ ÜST BİLGİ */}
+<div className="mb-3 flex items-center justify-between">
+  
+  {/* Sol: Icon + Symbol + 15m Candles */}
+  <div className="flex items-center gap-3 flex-wrap">
+    <img 
+      src={COIN_MAP[activeCoin]?.icon} 
+      alt={coinInfo?.symbol || 'coin'}
+      className="h-6 w-6 rounded-full object-cover"
+    />
+    <span className="text-sm font-semibold text-white whitespace-nowrap">
+      {coinInfo?.symbol || '...'}/USDT
+    </span>
+    <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">
+      15m Candles
+    </span>
+  </div>
+  
+  {/* Sağ: Price + 24h Change */}
+  {coinInfo && (
+    <div className="flex items-center gap-2">
+      <span className="text-lg font-bold font-mono text-white whitespace-nowrap">
+        ${coinInfo.currentPrice.toLocaleString(undefined, { 
+          minimumFractionDigits: 2, 
+          maximumFractionDigits: 2 
+        })}
+      </span>
+    </div>
+  )}
+</div>
 
-        {coinInfo && (
-          <div className="flex items-center gap-3">
-            <span className="text-lg font-bold font-mono text-white whitespace-nowrap">
-              {formatCurrency(coinInfo.currentPrice, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </span>
-            <span className={`text-sm font-semibold ${coinInfo.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-              {formatPercent(coinInfo.change24h, { minimumFractionDigits: 1, maximumFractionDigits: 1, showSign: true })}
-            </span>
-          </div>
-        )}
-      </div>
-
+      {/* Grafik */}
       {isLoading ? (
         <div className="flex h-[200px] items-center justify-center rounded-xl bg-slate-950/50">
           <div className="flex flex-col items-center gap-2">

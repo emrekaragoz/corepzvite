@@ -1,6 +1,7 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 
+// ✅ CoinTelegraph RSS → JSON (API key gerektirmez, ücretsiz)
 const RSS_URL = 'https://api.rss2json.com/v1/api.json?rss_url=https://cointelegraph.com/rss'
 
 function CryptoNews() {
@@ -12,12 +13,14 @@ function CryptoNews() {
       const json = await response.json()
       return json.items || []
     },
-    refetchInterval: 900000,
+    refetchInterval: 900000, // 15 dakika
     staleTime: 900000,
   })
 
+  // İlk 6 haberi al
   const news = data?.slice(0, 6) || []
 
+  // Relative time hesapla
   const getTimeAgo = (dateString) => {
     const now = Date.now()
     const published = new Date(dateString).getTime()
@@ -29,6 +32,7 @@ function CryptoNews() {
     return `${Math.floor(diff / 86400)}d ago`
   }
 
+  // HTML etiketlerini temizle
   const stripHtml = (html) => {
     if (!html) return ''
     return html.replace(/<[^>]*>/g, '').substring(0, 100) + '...'
@@ -36,6 +40,7 @@ function CryptoNews() {
 
   return (
     <div className="mt-6">
+      {/* Başlık */}
       <div className="mb-4 flex items-center gap-2">
         <div className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
         <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200">
@@ -69,6 +74,7 @@ function CryptoNews() {
               className="group rounded-xl border border-white/10 bg-slate-900/60 p-3 transition-all duration-300 hover:border-cyan-400/30 hover:bg-slate-900/80 hover:shadow-[0_0_20px_rgba(34,211,238,0.1)]"
             >
               <div className="flex items-start gap-3">
+                {/* Haber Görseli */}
                 {item.thumbnail || item.enclosure?.link ? (
                   <img 
                     src={item.thumbnail || item.enclosure.link} 
@@ -85,6 +91,8 @@ function CryptoNews() {
                     </svg>
                   </div>
                 )}
+                
+                {/* İçerik */}
                 <div className="min-w-0">
                   <h4 className="text-sm font-semibold text-white line-clamp-2 group-hover:text-cyan-200 transition-colors">
                     {item.title}

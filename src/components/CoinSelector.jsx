@@ -1,5 +1,31 @@
 import React from 'react'
-import { AVAILABLE_COINS } from '../utils/coins'
+
+const COINS = [
+  { 
+    id: 'BTC', 
+    label: 'BTC', 
+    locked: false,
+    icon: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/btc.png'
+  },
+  { 
+    id: 'XRP', 
+    label: 'XRP', 
+    locked: true,
+    icon: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/xrp.png'
+  },
+  { 
+    id: 'BNB', 
+    label: 'BNB', 
+    locked: true,
+    icon: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/bnb.png'
+  },
+  { 
+    id: 'TRX', 
+    label: 'TRX', 
+    locked: true,
+    icon: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/trx.png'
+  },
+]
 
 function LockIcon({ className }) {
   return (
@@ -29,7 +55,7 @@ function CoinSelector({ activeCoin, onSelectCoin }) {
   return (
     <div className="w-full max-w-full overflow-x-auto">
       <div className="mx-auto flex w-max items-center gap-1 rounded-full border border-cyan-500/20 bg-slate-900/60 p-1 backdrop-blur-md shadow-[0_0_20px_rgba(34,211,238,0.08)] sm:w-auto sm:flex-wrap sm:justify-center">
-        {AVAILABLE_COINS.map((coin) => {
+        {COINS.map((coin) => {
           const isActive = activeCoin === coin.id
           const isLocked = coin.locked
           
