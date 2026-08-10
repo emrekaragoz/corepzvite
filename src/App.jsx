@@ -9,8 +9,7 @@ import TradeList from './components/TradeList'
 import PositionCard from './components/PositionCard'
 import BrokerCashChart from './components/BrokerCashChart'
 import icon from './assets/icon.png'
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+import { API_BASE, getPosition, getTrades } from './utils/api'
 
 function App() {
   const [queryClient] = useState(() => new QueryClient())
@@ -30,14 +29,9 @@ function App() {
 function Dashboard() {
   const [activeCoin, setActiveCoin] = useState('BTC')
 
-  // ✅ TRADE GEÇMİŞİ
   const { data: trades, isLoading: isLoadingTrades, error: tradesError } = useQuery({
     queryKey: ['trades', activeCoin],
-    queryFn: async () => {
-      const response = await fetch(`${API_BASE}/api/trades`)
-      if (!response.ok) throw new Error('Failed to fetch trades')
-      return response.json()
-    },
+    queryFn: getTrades,
     refetchInterval: 30000,
     staleTime: 25000,
     gcTime: 10 * 60 * 1000,
@@ -46,14 +40,9 @@ function Dashboard() {
     placeholderData: (previousData) => previousData,
   })
 
-  // ✅ AKTİF POZİSYON
   const { data: activePosition, isLoading: isLoadingPosition } = useQuery({
     queryKey: ['position', activeCoin],
-    queryFn: async () => {
-      const response = await fetch(`${API_BASE}/api/position`)
-      if (!response.ok) throw new Error('Failed to fetch position')
-      return response.json()
-    },
+    queryFn: getPosition,
   })
 
   const isLoading = isLoadingTrades || isLoadingPosition
@@ -62,28 +51,17 @@ function Dashboard() {
 
   return (
     <div className="w-full rounded-2xl border border-cyan-400/20 bg-slate-950/80 p-2 shadow-[0_0_24px_rgba(34,211,238,0.12)] backdrop-blur-xl sm:p-3">
-      
-      
       <div className="mb-4 relative flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-start">
-        
-        {/* Üst (mobil) / Sol (desktop): Icon + Trade Dashboard */}
         <div className="flex min-w-0 items-center gap-2">
-          <img 
-            src={icon} 
-            alt="Logo" 
-            className="h-10 w-10" 
-          />
+          <img src={icon} alt="Logo" className="h-10 w-10" />
           <p className="min-w-0 text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300/90 truncate">
             Trade Dashboard
           </p>
         </div>
-        
-        {/* Alt (mobil) / Ortada: CoinSelector */}
         <div className="flex w-full items-center justify-center sm:absolute sm:left-1/2 sm:top-1/2 sm:w-auto sm:-translate-x-1/2 sm:-translate-y-1/2">
           <CoinSelector activeCoin={activeCoin} onSelectCoin={setActiveCoin} />
         </div>
       </div>
-      {/* Loading / Error */}
       {isLoading ? (
         <div className="flex min-h-[200px] flex-col items-center justify-center rounded-2xl border border-cyan-400/20 bg-slate-900/70">
           <div className="mb-3 h-10 w-10 animate-spin rounded-full border-4 border-cyan-400/20 border-t-cyan-300 shadow-[0_0_30px_rgba(34,211,238,0.35)]" />
@@ -104,34 +82,19 @@ function Dashboard() {
             {error.message || 'Unable to connect to backend server.'}
           </p>
           <p className="mt-1 text-xs text-red-400/70">
-            Make sure backend is running
+            Ensure backend is running.
           </p>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          
-          {/* ═══════════════════════════════════════════ */}
-          {/* 1. PRICECHART + ACTIVE POSITION (MEVCUT)    */}
-          {/* ═══════════════════════════════════════════ */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="md:col-span-2">
-                <PositionCard 
-                  position={activePosition} 
-                  activeCoin={activeCoin} 
-                />
+              <PositionCard position={activePosition} activeCoin={activeCoin} />
             </div>
             <div className="md:col-span-3">
-              <PriceChart 
-                activeCoin={activeCoin} 
-                buyOrder={hasPosition ? activePosition : null} 
-              />
+              <PriceChart activeCoin={activeCoin} buyOrder={hasPosition ? activePosition : null} />
             </div>
           </div>
-
-          {/* ═══════════════════════════════════════════ */}
-          {/* 2. TRA DELIST + BROKER CASH   */}
-          {/* ═══════════════════════════════════════════ */}
-          {/* TradeList + BrokerCash */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             <div className="lg:col-span-2 flex flex-col gap-4">
               <TradeList trades={trades || []} />
@@ -141,7 +104,6 @@ function Dashboard() {
               <SubscribeCard />
             </div>
           </div>
-          
           <CryptoNews />
         </div>
       )}

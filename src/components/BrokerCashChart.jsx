@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
 import Chart from 'react-apexcharts'
+import { formatCurrency, formatPercent } from '../utils/date'
 
 const INITIAL_CASH = 1000
 const LEVERAGE = 10
@@ -39,6 +40,8 @@ function BrokerCashChart({ trades }) {
 
   const isProfit = totalProfit >= 0
   const accentColor = isProfit ? '#22c55e' : '#ef4444'
+  const currentValueLabel = formatCurrency(currentValue, { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+  const profitPercentLabel = formatPercent(profitPercent, { minimumFractionDigits: 1, maximumFractionDigits: 1, showSign: true })
 
   const options = {
     chart: {
@@ -136,17 +139,11 @@ function BrokerCashChart({ trades }) {
 
   return (
     <div className="relative rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/60 to-slate-950/40 p-4 backdrop-blur-sm flex flex-col overflow-hidden">
-      
-      {/* Dekoratif glow efekti */}
       <div 
         className="pointer-events-none absolute -top-20 -right-20 h-40 w-40 rounded-full blur-3xl opacity-20"
         style={{ backgroundColor: accentColor }}
       />
-
-      {/* ÜST: Başlık (sol) + Miktar + Yüzde (sağ) */}
       <div className="relative mb-3 flex items-center justify-between">
-        
-        {/* Sol: Broker Cash + Leverage */}
         <div className="flex items-center gap-2.5">
           <span 
             className="h-2 w-2 rounded-full shadow-lg" 
@@ -156,21 +153,17 @@ function BrokerCashChart({ trades }) {
             Broker Cash
           </h3>
         </div>
-
-        {/* Sağ: Miktar + Yüzde (aynı boyut) */}
         <div className="flex items-center gap-2">
           <p className="text-lg font-bold font-mono text-white leading-none whitespace-nowrap">
-            ${Math.round(currentValue)}
+            {currentValueLabel}
           </p>
           <p className={`text-md font-bold font-mono leading-none whitespace-nowrap ${
             isProfit ? 'text-emerald-400' : 'text-rose-400'
           }`}>
-            ({isProfit ? '+' : ''}{profitPercent.toFixed(1)}%)
+            ({profitPercentLabel})
           </p>
         </div>
       </div>
-
-      {/* GRAFİK */}
       <div className="relative h-[280px] w-full">
         {chartData.length > 1 ? (
           <Chart 

@@ -1,42 +1,17 @@
 import React from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { formatDateDisplay } from '../utils/date'
-
-// ✅ Duration string'ini "18hours 15mins" formatına çevirir
-const formatDuration = (durationStr) => {
-  if (!durationStr || durationStr === 'N/A' || durationStr === '') return '—'
-
-  const normalized = String(durationStr).trim()
-
-  if (/^\d{1,2}:\d{2}:\d{2}$/.test(normalized)) {
-    const [hours, minutes] = normalized.split(':').map(Number)
-    return `${hours} hours ${minutes} mins`
-  }
-
-  let hours = 0
-  let minutes = 0
-
-  const hourMatch = normalized.match(/(\d+)h/)
-  const minMatch = normalized.match(/(\d+)m/)
-
-  if (hourMatch) hours = parseInt(hourMatch[1], 10)
-  if (minMatch) minutes = parseInt(minMatch[1], 10)
-
-  return `${hours} hours ${minutes} mins`
-}
+import { formatDateDisplay, formatDuration, formatTradeValue, formatPercent } from '../utils/date'
 
 function TradeList({ trades }) {
-  // ✅ En yeni 5 trade'i göster
   const MAX_VISIBLE_TRADES = 4
-  
-  // En yeni trade'i en üste almak için sell_time'a göre sırala
+
   const sortedTrades = [...(trades || [])]
     .sort((a, b) => {
       const timeA = new Date(a.sell_time).getTime()
       const timeB = new Date(b.sell_time).getTime()
       return timeB - timeA
     })
-    .slice(0, MAX_VISIBLE_TRADES)  // ✅ Sadece ilk 5 tanesini al
+    .slice(0, MAX_VISIBLE_TRADES)
 
   if (sortedTrades.length === 0) {
     return (
@@ -48,7 +23,6 @@ function TradeList({ trades }) {
 
   return (
     <div className="flex flex-col gap-2 rounded-3xl border border-cyan-500/10 bg-slate-950/70 p-2">
-      {/* ✅ Toplam trade sayısı bilgisini göster */}
       <div className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-white/10 bg-slate-900/70 p-2 text-[11px] leading-snug">
         <h2 className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-200">
           - Position History -
@@ -68,21 +42,13 @@ function TradeRow({ trade, index }) {
   const profit = Number.isFinite(numericProfit) ? numericProfit : 0
   const profitClass = profit > 0 ? 'text-emerald-400' : profit < 0 ? 'text-rose-400' : 'text-slate-100'
   
-  const formatValue = (value) => {
-    if (value === null || value === undefined || value === '') return '—'
+  const formatValue = formatTradeValue
 
-    const numericValue = Number(value)
-    if (Number.isFinite(numericValue)) {
-      return numericValue.toLocaleString(undefined, {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2
-      })
-    }
-
-    return value
-  }
-
-  const profitDisplay = `${profit < 0 ? '-' : '+'}${formatValue(Math.abs(profit))}%`
+  const profitDisplay = formatPercent(profit, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+    showSign: true,
+  })
 
   return (
     <motion.div
@@ -95,15 +61,13 @@ function TradeRow({ trade, index }) {
       
       <div className="relative z-10 grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
         
-        {/* PROFIT */}
         <div className="flex flex-col justify-center rounded-2xl bg-slate-900/80 p-2">
           <p className="mb-1 text-[9px] uppercase tracking-[0.18em] text-slate-400">Profit</p>
           <p className={`text-base font-bold font-mono ${profitClass} drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]`}>
-            {formatValue(profitDisplay)}
+            {profitDisplay}
           </p>
         </div>
 
-        {/* DURATION */}
         <div className="flex flex-col justify-center rounded-2xl bg-slate-900/80 p-2">
           <p className="mb-1 text-[9px] uppercase tracking-[0.18em] text-slate-400">Duration</p>
           <p className="text-sm font-bold font-mono text-cyan-100 leading-tight">
@@ -111,7 +75,6 @@ function TradeRow({ trade, index }) {
           </p>
         </div>
 
-        {/* PRICES */}
         <div className="flex flex-col justify-center rounded-2xl bg-slate-900/80 p-2">
           <div className="mb-1">
             <p className="text-[9px] uppercase tracking-[0.18em] text-slate-500">Sell Price</p>
@@ -123,7 +86,6 @@ function TradeRow({ trade, index }) {
           </div>
         </div>
 
-        {/* TIMES */}
         <div className="flex flex-col justify-center rounded-2xl bg-slate-900/80 p-2">
           <div className="mb-1">
             <p className="text-[9px] uppercase tracking-[0.18em] text-slate-500">Sell Time</p>

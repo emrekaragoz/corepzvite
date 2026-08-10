@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react'
+import { formatCurrency, formatPercent } from '../utils/date'
 
 function SummaryCard({ trades }) {
   const [timeframe, setTimeframe] = useState('1m')
@@ -10,7 +11,6 @@ function SummaryCard({ trades }) {
     { id: '3m', label: '3 Months' },
   ]
 
-  // Zaman dilimine göre trade'leri filtrele
   const filteredTrades = useMemo(() => {
     if (!trades || trades.length === 0) return []
 
@@ -37,17 +37,14 @@ function SummaryCard({ trades }) {
     return trades.filter(trade => new Date(trade.buy_time) >= cutoffDate)
   }, [trades, timeframe])
 
-  // Compound (bileşik) hesaplama
   const result = useMemo(() => {
     const initialAmount = 100000
     let currentAmount = initialAmount
 
-    // Trade'leri tarihe göre sırala (en eski önce)
     const sortedTrades = [...filteredTrades].sort(
       (a, b) => new Date(a.buy_time) - new Date(b.buy_time)
     )
 
-    // Sırayla compound uygula
     sortedTrades.forEach(trade => {
       let profitPercentage = trade.profit * currentAmount / 100
       currentAmount = currentAmount + profitPercentage
@@ -65,23 +62,9 @@ function SummaryCard({ trades }) {
   const isProfit = result.profit >= 0
   const profitColor = isProfit ? 'text-emerald-400' : 'text-rose-400'
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value)
-  }
-
   const formatProfit = (value) => {
-    const formatted = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(Math.abs(value))
-    return `${value >= 0 ? '+' : '-'}${formatted}`
+    const sign = value >= 0 ? '+' : '-'
+    return `${sign}${formatCurrency(Math.abs(value), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
   }
 
   return (
