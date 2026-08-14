@@ -2,7 +2,6 @@ import React, { useMemo } from 'react'
 import Chart from 'react-apexcharts'
 
 const INITIAL_CASH = 1000
-const LEVERAGE = 10
 
 function BrokerCashChart({ trades }) {
   const { chartData, currentValue, totalProfit, profitPercent } = useMemo(() => {
@@ -15,16 +14,20 @@ function BrokerCashChart({ trades }) {
       }
     }
 
+    // Tarihe göre en eskiden en yeniye sırala
     const sorted = [...trades].sort(
       (a, b) => new Date(a.buy_time) - new Date(b.buy_time)
     )
 
+    // İlk veri noktası: ilk işlemden hemen önceki başlangıç bakiyesi
     const data = [{ x: new Date(sorted[0].buy_time).getTime() - 60000, y: INITIAL_CASH }]
     let current = INITIAL_CASH
 
     sorted.forEach((trade) => {
-      const leveragedProfit = (trade.profit || 0) * LEVERAGE
-      current += leveragedProfit
+      // trade.profit yüzde olarak kabul edilir (örn. 10 → %10)
+      const profitPercent = trade.profit || 0
+      // Bileşik büyüme: current = current * (1 + profitPercent/100)
+      current *= (1 + profitPercent / 100)
       data.push({
         x: new Date(trade.sell_time || trade.buy_time).getTime(),
         y: current
