@@ -42,6 +42,7 @@ function BrokerCashChart({ trades, bankAccount }) {
 
   const isProfit = totalProfit >= 0
   const accentColor = isProfit ? '#22c55e' : '#ef4444'
+  const displayedCurrentValue = currentValue * 0.8
   const formattedBankAccount = Number.isFinite(Number(bankAccount))
     ? `$${Math.round(Number(bankAccount))}`
     : '—'
@@ -179,7 +180,7 @@ function BrokerCashChart({ trades, bankAccount }) {
               Binance Hesabı
             </span>
             <p className="text-lg font-bold font-mono text-white leading-none whitespace-nowrap">
-              ${Math.round(currentValue)}
+              ${Math.round(displayedCurrentValue)}
             </p>
             <div className="flex items-center gap-2">
               <p className={`text-md font-bold font-mono leading-none whitespace-nowrap ${

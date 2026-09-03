@@ -50,7 +50,7 @@ function TradeList({ trades }) {
           - Position History -
         </h2>
       </div>
-      <div className="max-h-[520px] overflow-y-auto pr-1">
+      <div className="custom-scrollbar max-h-[520px] overflow-y-auto pr-1">
         <AnimatePresence mode="popLayout">
           {sortedTrades.map((trade, index) => (
             <TradeRow key={trade.id || index} trade={trade} index={index} />
