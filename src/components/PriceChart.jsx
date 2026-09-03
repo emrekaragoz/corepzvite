@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Chart from 'react-apexcharts'
 
 const COIN_MAP = {
@@ -35,10 +35,13 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [annotations, setAnnotations] = useState({})
+  const [selectedCandle, setSelectedCandle] = useState(null)
+  const chartContainerRef = useRef(null)
 
   // Data fetch
   useEffect(() => {
     fetchChartData()
+    setSelectedCandle(null)
   }, [activeCoin])
 
   // Annotations update
@@ -140,13 +143,54 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
     }
   }
 
+  const handleChartClick = (event, _chartContext, config) => {
+    const dataPointIndex = config?.dataPointIndex
+    const selectedData = chartData[dataPointIndex]
+    const container = chartContainerRef.current
+
+    if (dataPointIndex === undefined || dataPointIndex < 0 || !selectedData || !container) {
+      return
+    }
+
+    const bounds = container.getBoundingClientRect()
+    const tooltipWidth = 150
+    const tooltipHeight = 58
+    const left = Math.min(
+      Math.max(event.clientX - bounds.left - tooltipWidth / 2, 8),
+      Math.max(8, bounds.width - tooltipWidth - 8)
+    )
+    const top = Math.min(
+      Math.max(event.clientY - bounds.top - tooltipHeight - 12, 8),
+      Math.max(8, bounds.height - tooltipHeight - 8)
+    )
+
+    setSelectedCandle({
+      data: selectedData,
+      position: { left, top }
+    })
+  }
+
   const chartOptions = {
     chart: {
       type: 'candlestick',
       height: 200,
       background: 'transparent',
       toolbar: { show: false },
-      zoom: { enabled: true },
+      zoom: {
+        enabled: true,
+        type: 'x',
+        autoScaleYaxis: true,
+        allowMouseWheelZoom: true,
+      },
+      pan: {
+        enabled: true,
+        type: 'x',
+      },
+      events: {
+        click: handleChartClick,
+        zoomed: () => setSelectedCandle(null),
+        scrolled: () => setSelectedCandle(null),
+      },
     },
     theme: { mode: 'dark' },
     grid: {
@@ -211,7 +255,10 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
             </div>
           </div>
         `
-      }
+      },
+      followCursor: false,
+      intersect: true,
+      shared: false,
     },
     annotations: annotations,
   }
@@ -278,13 +325,34 @@ function PriceChart({ activeCoin = 'BTC', buyOrder = null }) {
           </div>
         </div>
       ) : (
-        <div className="h-[200px] w-full">
+        <div ref={chartContainerRef} className="relative h-[200px] w-full">
           <Chart 
             options={chartOptions} 
             series={chartSeries} 
             type="candlestick" 
             height={200} 
           />
+          {selectedCandle && (
+            <div
+              className="pointer-events-none absolute z-20 w-[150px] rounded-lg border border-cyan-400/30 bg-slate-900/95 px-3 py-2 shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+              style={{ left: selectedCandle.position.left, top: selectedCandle.position.top }}
+            >
+              <p className="mb-1 text-[11px] text-slate-400">
+                {new Date(selectedCandle.data.x).toLocaleString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
+              <p className="text-sm font-bold text-cyan-300">
+                ${selectedCandle.data.y[3].toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
