@@ -26,9 +26,6 @@ const formatDuration = (durationStr) => {
 }
 
 function TradeList({ trades }) {
-  // ✅ En yeni 5 trade'i göster
-  const MAX_VISIBLE_TRADES = 4
-  
   // En yeni trade'i en üste almak için sell_time'a göre sırala
   const sortedTrades = [...(trades || [])]
     .sort((a, b) => {
@@ -36,7 +33,6 @@ function TradeList({ trades }) {
       const timeB = new Date(b.sell_time).getTime()
       return timeB - timeA
     })
-    .slice(0, MAX_VISIBLE_TRADES)  // ✅ Sadece ilk 5 tanesini al
 
   if (sortedTrades.length === 0) {
     return (
@@ -54,11 +50,13 @@ function TradeList({ trades }) {
           - Position History -
         </h2>
       </div>
-      <AnimatePresence mode="popLayout">
-        {sortedTrades.map((trade, index) => (
-          <TradeRow key={trade.id || index} trade={trade} index={index} />
-        ))}
-      </AnimatePresence>
+      <div className="max-h-[520px] overflow-y-auto pr-1">
+        <AnimatePresence mode="popLayout">
+          {sortedTrades.map((trade, index) => (
+            <TradeRow key={trade.id || index} trade={trade} index={index} />
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
