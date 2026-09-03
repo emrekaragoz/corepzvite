@@ -3,7 +3,7 @@ import Chart from 'react-apexcharts'
 
 const INITIAL_CASH = 1000
 
-function BrokerCashChart({ trades }) {
+function BrokerCashChart({ trades, bankAccount }) {
   const { chartData, currentValue, totalProfit, profitPercent } = useMemo(() => {
     if (!trades || trades.length === 0) {
       return {
@@ -42,6 +42,9 @@ function BrokerCashChart({ trades }) {
 
   const isProfit = totalProfit >= 0
   const accentColor = isProfit ? '#22c55e' : '#ef4444'
+  const formattedBankAccount = Number.isFinite(Number(bankAccount))
+    ? `$${Math.round(Number(bankAccount))}`
+    : '—'
 
   const options = {
     chart: {
@@ -147,7 +150,7 @@ function BrokerCashChart({ trades }) {
       />
 
       {/* ÜST: Başlık (sol) + Miktar + Yüzde (sağ) */}
-      <div className="relative mb-3 flex items-center justify-between">
+      <div className="relative mb-3 flex flex-wrap items-center justify-between gap-3">
         
         {/* Sol: Broker Cash + Leverage */}
         <div className="flex items-center gap-2.5">
@@ -160,16 +163,27 @@ function BrokerCashChart({ trades }) {
           </h3>
         </div>
 
-        {/* Sağ: Miktar + Yüzde (aynı boyut) */}
-        <div className="flex items-center gap-2">
-          <p className="text-lg font-bold font-mono text-white leading-none whitespace-nowrap">
-            ${Math.round(currentValue)}
-          </p>
-          <p className={`text-md font-bold font-mono leading-none whitespace-nowrap ${
-            isProfit ? 'text-emerald-400' : 'text-rose-400'
-          }`}>
-            ({isProfit ? '+' : ''}{profitPercent.toFixed(1)}%)
-          </p>
+        {/* Sağ: Banka birikimi + Broker Cash miktarı + Yüzde */}
+        <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2">
+          <div className="flex flex-col items-end">
+            <span className="text-[9px] uppercase tracking-[0.16em] text-slate-500">
+              Banka Birikimi
+            </span>
+            <p className="text-lg font-bold font-mono leading-none text-amber-300 whitespace-nowrap">
+              {formattedBankAccount}
+            </p>
+          </div>
+          <div className="h-8 w-px bg-slate-700/70" />
+          <div className="flex items-center gap-2">
+            <p className="text-lg font-bold font-mono text-white leading-none whitespace-nowrap">
+              ${Math.round(currentValue)}
+            </p>
+            <p className={`text-md font-bold font-mono leading-none whitespace-nowrap ${
+              isProfit ? 'text-emerald-400' : 'text-rose-400'
+            }`}>
+              ({isProfit ? '+' : ''}{profitPercent.toFixed(1)}%)
+            </p>
+          </div>
         </div>
       </div>
 

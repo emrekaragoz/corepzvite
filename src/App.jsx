@@ -56,6 +56,19 @@ function Dashboard() {
     },
   })
 
+  const { data: bankAccountData } = useQuery({
+    queryKey: ['bank-account'],
+    queryFn: async () => {
+      const response = await fetch(`${API_BASE}/api/bank-account`)
+      if (!response.ok) throw new Error('Failed to fetch bank account')
+      return response.json()
+    },
+    refetchInterval: 30000,
+    staleTime: 25000,
+    retry: 3,
+    retryDelay: 2000,
+  })
+
   const isLoading = isLoadingTrades || isLoadingPosition
   const error = tradesError
   const hasPosition = activePosition && activePosition.buy_time
@@ -137,7 +150,10 @@ function Dashboard() {
               <TradeList trades={trades || []} />
             </div>
             <div className="lg:col-span-3 flex flex-col gap-4">
-              <BrokerCashChart trades={trades || []} />
+              <BrokerCashChart
+                trades={trades || []}
+                bankAccount={bankAccountData?.bank_account}
+              />
               <SubscribeCard />
             </div>
           </div>
