@@ -174,15 +174,20 @@ function BrokerCashChart({ trades, bankAccount }) {
             </p>
           </div>
           <div className="h-8 w-px bg-slate-700/70" />
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col items-end">
+            <span className="text-[9px] uppercase tracking-[0.16em] text-slate-500">
+              Binance Hesabı
+            </span>
             <p className="text-lg font-bold font-mono text-white leading-none whitespace-nowrap">
               ${Math.round(currentValue)}
             </p>
-            <p className={`text-md font-bold font-mono leading-none whitespace-nowrap ${
-              isProfit ? 'text-emerald-400' : 'text-rose-400'
-            }`}>
-              ({isProfit ? '+' : ''}{profitPercent.toFixed(1)}%)
-            </p>
+            <div className="flex items-center gap-2">
+              <p className={`text-md font-bold font-mono leading-none whitespace-nowrap ${
+                isProfit ? 'text-emerald-400' : 'text-rose-400'
+              }`}>
+                ({isProfit ? '+' : ''}{profitPercent.toFixed(1)}%)
+              </p>
+            </div>
           </div>
         </div>
       </div>
