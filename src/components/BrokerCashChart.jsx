@@ -40,7 +40,7 @@ function BrokerCashChart({ trades, bankAccount }) {
 
   const isProfit = totalProfit >= 0
   const accentColor = isProfit ? '#22c55e' : '#ef4444'
-  const displayedCurrentValue = currentValue * 0.8
+  const displayedCurrentValue = currentValue * 1
   const formattedBankAccount = Number.isFinite(Number(bankAccount))
     ? `$${Math.round(Number(bankAccount))}`
     : '—'
