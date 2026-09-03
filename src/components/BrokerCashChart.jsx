@@ -4,13 +4,12 @@ import Chart from 'react-apexcharts'
 const INITIAL_CASH = 1000
 
 function BrokerCashChart({ trades, bankAccount }) {
-  const { chartData, currentValue, totalProfit, profitPercent } = useMemo(() => {
+  const { chartData, currentValue, totalProfit } = useMemo(() => {
     if (!trades || trades.length === 0) {
       return {
         chartData: [{ x: new Date(), y: INITIAL_CASH }],
         currentValue: INITIAL_CASH,
-        totalProfit: 0,
-        profitPercent: 0
+        totalProfit: 0
       }
     }
 
@@ -25,9 +24,9 @@ function BrokerCashChart({ trades, bankAccount }) {
 
     sorted.forEach((trade) => {
       // trade.profit yüzde olarak kabul edilir (örn. 10 → %10)
-      const profitPercent = trade.profit || 0
-      // Bileşik büyüme: current = current * (1 + profitPercent/100)
-      current *= (1 + profitPercent / 100)
+      const tradeProfit = trade.profit || 0
+      // Bileşik büyüme: current = current * (1 + tradeProfit/100)
+      current *= (1 + tradeProfit / 100)
       data.push({
         x: new Date(trade.sell_time || trade.buy_time).getTime(),
         y: current
@@ -35,9 +34,8 @@ function BrokerCashChart({ trades, bankAccount }) {
     })
 
     const totalProfit = current - INITIAL_CASH
-    const profitPercent = (totalProfit / INITIAL_CASH) * 100
 
-    return { chartData: data, currentValue: current, totalProfit, profitPercent }
+    return { chartData: data, currentValue: current, totalProfit }
   }, [trades])
 
   const isProfit = totalProfit >= 0
@@ -182,13 +180,6 @@ function BrokerCashChart({ trades, bankAccount }) {
             <p className="text-lg font-bold font-mono text-white leading-none whitespace-nowrap">
               ${Math.round(displayedCurrentValue)}
             </p>
-            <div className="flex items-center gap-2">
-              <p className={`text-md font-bold font-mono leading-none whitespace-nowrap ${
-                isProfit ? 'text-emerald-400' : 'text-rose-400'
-              }`}>
-                ({isProfit ? '+' : ''}{profitPercent.toFixed(1)}%)
-              </p>
-            </div>
           </div>
         </div>
       </div>
