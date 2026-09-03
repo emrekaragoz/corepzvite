@@ -26,7 +26,7 @@ function BrokerCashChart({ trades, bankAccount }) {
       // trade.profit yüzde olarak kabul edilir (örn. 10 → %10)
       const tradeProfit = trade.profit || 0
       // Bileşik büyüme: current = current * (1 + tradeProfit/100)
-      current *= (1 + tradeProfit / 100)
+      current *= (1 + tradeProfit / 100) * 0.98
       data.push({
         x: new Date(trade.sell_time || trade.buy_time).getTime(),
         y: current
